@@ -8,12 +8,15 @@ edition = "2021"
 crate-type = ["cdylib", "lib"]
 name = "smart_passport"
 
-[dependencies]
-anchor-lang = "0.30.1"
-
 [features]
 no-entrypoint = []
 no-idl = []
 no-log-ix-name = []
 cpi = ["no-entrypoint"]
 default = []
+idl-build = ["anchor-lang/idl-build"]
+
+[dependencies]
+anchor-lang = "0.30.1"
+anchor-spl = { version = "0.30.1", optional = true }
+proc-macro2 = "=1.0.86"  # Точно фіксуємо версію
