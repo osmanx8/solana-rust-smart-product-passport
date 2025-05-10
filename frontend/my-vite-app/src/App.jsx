@@ -1,4 +1,6 @@
 import { useState, useEffect } from 'react';
+import { Connection, clusterApiUrl, PublicKey } from '@solana/web3.js';
+
 
 const App = () => {
   const [walletAddress, setWalletAddress] = useState(null);
@@ -20,9 +22,9 @@ const App = () => {
   const [sortField, setSortField] = useState('serialNumber');
   const [sortOrder, setSortOrder] = useState('asc');
 
-  const connection = new window.SolanaWeb3.Connection('https://api.devnet.solana.com', 'confirmed');
-  const PROGRAM_ID = new window.SolanaWeb3.PublicKey('YourProgramIdHere');
-  const ADMIN_PUBLIC_KEY = 'AdminPubKeyHere';
+  const connection = new Connection(clusterApiUrl('devnet'), 'confirmed');
+  const PROGRAM_ID = new PublicKey(import.meta.env.PROGRAM_ID);
+  const ADMIN_PUBLIC_KEY = import.meta.env.ADMIN_PUBLIC_KEY;
 
   const initializeProgram = async () => {
     const provider = new window.Anchor.AnchorProvider(connection, window.solana, {
@@ -157,7 +159,7 @@ const App = () => {
         try {
           const passport = await program.account.passport.fetch(account.pubkey);
           if (passport && (role === 'user' && passport.owner.toString() === walletAddress) ||
-              (role === 'manufacturer' && passport.manufacturerId === walletAddress)) {
+            (role === 'manufacturer' && passport.manufacturerId === walletAddress)) {
             fetchedPassports.push({ ...passport, address: account.pubkey.toString() });
           }
         } catch (error) {
