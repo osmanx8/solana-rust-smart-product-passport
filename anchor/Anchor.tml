@@ -1,9 +1,9 @@
-[toolchain]
-anchor_version = "0.29.0"
-solana_version = "1.18.22"
+[features]
+seeds = false
+skip-lint = false
 
 [programs.devnet]
-smart_passport = "SPPAssp0rt1111111111111111111111111111111111"
+smart_passport = "YourProgramIdHere"
 
 [registry]
 url = "https://api.apr.dev"

@@ -1,0 +1,15 @@
+{
+    "scripts": {
+      "lint": "eslint . --ext .ts,.tsx",
+      "test": "ts-mocha -p ./tsconfig.json -t 1000000 tests/**/*.ts"
+    },
+    "dependencies": {
+      "@project-serum/anchor": "^0.26.0"
+    },
+    "devDependencies": {
+      "@types/mocha": "^10.0.1",
+      "eslint": "^8.57.0",
+      "ts-mocha": "^10.0.0",
+      "typescript": "^5.0.4"
+    }
+  }
