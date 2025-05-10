@@ -1,0 +1,11 @@
+/mnt/c/Users/user/Desktop/SPP/anchor/target/debug/deps/libtoml_write-54aa925c33cf8d59.rmeta: /home/karbivskyi/.cargo/registry/src/index.crates.io-6f17d22bba15001f/toml_write-0.1.1/src/lib.rs /home/karbivskyi/.cargo/registry/src/index.crates.io-6f17d22bba15001f/toml_write-0.1.1/src/key.rs /home/karbivskyi/.cargo/registry/src/index.crates.io-6f17d22bba15001f/toml_write-0.1.1/src/string.rs /home/karbivskyi/.cargo/registry/src/index.crates.io-6f17d22bba15001f/toml_write-0.1.1/src/value.rs /home/karbivskyi/.cargo/registry/src/index.crates.io-6f17d22bba15001f/toml_write-0.1.1/src/write.rs
+
+/mnt/c/Users/user/Desktop/SPP/anchor/target/debug/deps/libtoml_write-54aa925c33cf8d59.rlib: /home/karbivskyi/.cargo/registry/src/index.crates.io-6f17d22bba15001f/toml_write-0.1.1/src/lib.rs /home/karbivskyi/.cargo/registry/src/index.crates.io-6f17d22bba15001f/toml_write-0.1.1/src/key.rs /home/karbivskyi/.cargo/registry/src/index.crates.io-6f17d22bba15001f/toml_write-0.1.1/src/string.rs /home/karbivskyi/.cargo/registry/src/index.crates.io-6f17d22bba15001f/toml_write-0.1.1/src/value.rs /home/karbivskyi/.cargo/registry/src/index.crates.io-6f17d22bba15001f/toml_write-0.1.1/src/write.rs
+
+/mnt/c/Users/user/Desktop/SPP/anchor/target/debug/deps/toml_write-54aa925c33cf8d59.d: /home/karbivskyi/.cargo/registry/src/index.crates.io-6f17d22bba15001f/toml_write-0.1.1/src/lib.rs /home/karbivskyi/.cargo/registry/src/index.crates.io-6f17d22bba15001f/toml_write-0.1.1/src/key.rs /home/karbivskyi/.cargo/registry/src/index.crates.io-6f17d22bba15001f/toml_write-0.1.1/src/string.rs /home/karbivskyi/.cargo/registry/src/index.crates.io-6f17d22bba15001f/toml_write-0.1.1/src/value.rs /home/karbivskyi/.cargo/registry/src/index.crates.io-6f17d22bba15001f/toml_write-0.1.1/src/write.rs
+
+/home/karbivskyi/.cargo/registry/src/index.crates.io-6f17d22bba15001f/toml_write-0.1.1/src/lib.rs:
+/home/karbivskyi/.cargo/registry/src/index.crates.io-6f17d22bba15001f/toml_write-0.1.1/src/key.rs:
+/home/karbivskyi/.cargo/registry/src/index.crates.io-6f17d22bba15001f/toml_write-0.1.1/src/string.rs:
+/home/karbivskyi/.cargo/registry/src/index.crates.io-6f17d22bba15001f/toml_write-0.1.1/src/value.rs:
+/home/karbivskyi/.cargo/registry/src/index.crates.io-6f17d22bba15001f/toml_write-0.1.1/src/write.rs:

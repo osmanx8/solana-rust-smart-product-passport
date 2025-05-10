@@ -1,0 +1,1 @@
+{"rustc":15952695707457292308,"features":"","target":0,"profile":0,"path":0,"deps":[[5247968963080504553,"build_script_build",false,3614576049521826603]],"local":[{"RerunIfChanged":{"output":"sbf-solana-solana/release/build/proc-macro2-9781c85478cbf580/output","paths":["build/probe.rs"]}}],"rustflags":[],"metadata":0,"config":0,"compile_kind":0}

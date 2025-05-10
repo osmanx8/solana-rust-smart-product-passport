@@ -1,0 +1,217 @@
+{
+  "address": "8tdpknetCPXv5Ztk8yoJWceRCgCxp3T6U56TnUGk99t4",
+  "metadata": {
+    "name": "smart_passport",
+    "version": "0.1.0",
+    "spec": "0.1.0",
+    "description": "Smart Product Passport program on Solana"
+  },
+  "instructions": [
+    {
+      "name": "add_manufacturer",
+      "discriminator": [
+        160,
+        104,
+        90,
+        137,
+        232,
+        74,
+        142,
+        42
+      ],
+      "accounts": [
+        {
+          "name": "manufacturer_list",
+          "writable": true
+        },
+        {
+          "name": "admin",
+          "signer": true
+        }
+      ],
+      "args": [
+        {
+          "name": "manufacturer",
+          "type": "pubkey"
+        }
+      ]
+    },
+    {
+      "name": "create_passport",
+      "discriminator": [
+        107,
+        136,
+        98,
+        163,
+        167,
+        217,
+        174,
+        84
+      ],
+      "accounts": [
+        {
+          "name": "passport",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "user",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "serial_number",
+          "type": "string"
+        },
+        {
+          "name": "production_date",
+          "type": "string"
+        },
+        {
+          "name": "device_model",
+          "type": "string"
+        },
+        {
+          "name": "warranty_period",
+          "type": "string"
+        },
+        {
+          "name": "country_of_origin",
+          "type": "string"
+        },
+        {
+          "name": "manufacturer_id",
+          "type": "string"
+        },
+        {
+          "name": "ipfs_cid",
+          "type": "string"
+        },
+        {
+          "name": "owner",
+          "type": "pubkey"
+        }
+      ]
+    },
+    {
+      "name": "initialize",
+      "discriminator": [
+        175,
+        175,
+        109,
+        31,
+        13,
+        152,
+        155,
+        237
+      ],
+      "accounts": [
+        {
+          "name": "manufacturer_list",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "admin",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": []
+    }
+  ],
+  "accounts": [
+    {
+      "name": "ManufacturerList",
+      "discriminator": [
+        251,
+        212,
+        99,
+        111,
+        200,
+        211,
+        96,
+        96
+      ]
+    },
+    {
+      "name": "Passport",
+      "discriminator": [
+        18,
+        61,
+        245,
+        239,
+        6,
+        15,
+        18,
+        34
+      ]
+    }
+  ],
+  "types": [
+    {
+      "name": "ManufacturerList",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "manufacturers",
+            "type": {
+              "vec": "pubkey"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "Passport",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "serial_number",
+            "type": "string"
+          },
+          {
+            "name": "production_date",
+            "type": "string"
+          },
+          {
+            "name": "device_model",
+            "type": "string"
+          },
+          {
+            "name": "warranty_period",
+            "type": "string"
+          },
+          {
+            "name": "country_of_origin",
+            "type": "string"
+          },
+          {
+            "name": "manufacturer_id",
+            "type": "string"
+          },
+          {
+            "name": "ipfs_cid",
+            "type": "string"
+          },
+          {
+            "name": "owner",
+            "type": "pubkey"
+          }
+        ]
+      }
+    }
+  ]
+}
