@@ -1,6 +1,9 @@
 import { useState, useEffect } from 'react';
-import { Connection, clusterApiUrl, PublicKey } from '@solana/web3.js';
-
+import { Connection, clusterApiUrl, PublicKey, Keypair, SystemProgram } from '@solana/web3.js';
+import { AnchorProvider, Program } from '@project-serum/anchor';
+import { create } from 'ipfs-http-client';
+import QRCode from 'qrcode';
+import { Buffer } from 'buffer';
 
 const App = () => {
   const [walletAddress, setWalletAddress] = useState(null);
@@ -23,118 +26,151 @@ const App = () => {
   const [sortOrder, setSortOrder] = useState('asc');
 
   const connection = new Connection(clusterApiUrl('devnet'), 'confirmed');
-  const PROGRAM_ID = new PublicKey(import.meta.env.PROGRAM_ID);
-  const ADMIN_PUBLIC_KEY = import.meta.env.ADMIN_PUBLIC_KEY;
+  const PROGRAM_ID = new PublicKey(import.meta.env.VITE_PROGRAM_ID || '8oxPShxgCJX5cZTRqtPpwAefVpTGjmhrMp69iEdLGduH');
+  const ADMIN_PUBLIC_KEY = new PublicKey('79p8ggDFPaYshTZaGsXLkJNdrphD3QrQsRv6hhdwAfFD');
 
   const initializeProgram = async () => {
-    const provider = new window.Anchor.AnchorProvider(connection, window.solana, {
-      preflightCommitment: 'confirmed',
-    });
+    try {
+      if (!connection || !window.solana) {
+        throw new Error('Connection or wallet not initialized');
+      }
 
-    const idl = {
-      "version": "0.1.0",
-      "name": "smart_passport",
-      "instructions": [
-        {
-          "name": "initialize",
-          "accounts": [
-            { "name": "manufacturerList", "isMut": true, "isSigner": false },
-            { "name": "admin", "isMut": true, "isSigner": true },
-            { "name": "systemProgram", "isMut": false, "isSigner": false }
-          ],
-          "args": []
-        },
-        {
-          "name": "addManufacturer",
-          "accounts": [
-            { "name": "manufacturerList", "isMut": true, "isSigner": false },
-            { "name": "admin", "isMut": false, "isSigner": true }
-          ],
-          "args": [
-            { "name": "manufacturer", "type": "publicKey" }
-          ]
-        },
-        {
-          "name": "createPassport",
-          "accounts": [
-            { "name": "passport", "isMut": true, "isSigner": false },
-            { "name": "user", "isMut": true, "isSigner": true },
-            { "name": "systemProgram", "isMut": false, "isSigner": false }
-          ],
-          "args": [
-            { "name": "serialNumber", "type": "string" },
-            { "name": "productionDate", "type": "string" },
-            { "name": "deviceModel", "type": "string" },
-            { "name": "warrantyPeriod", "type": "string" },
-            { "name": "countryOfOrigin", "type": "string" },
-            { "name": "manufacturerId", "type": "string" },
-            { "name": "ipfsCid", "type": "string" },
-            { "name": "owner", "type": "publicKey" }
-          ]
-        }
-      ],
-      "accounts": [
-        {
-          "name": "ManufacturerList",
-          "type": {
-            "kind": "struct",
-            "fields": [
-              { "name": "manufacturers", "type": { "vec": "publicKey" } }
-            ]
-          }
-        },
-        {
-          "name": "Passport",
-          "type": {
-            "kind": "struct",
-            "fields": [
-              { "name": "serialNumber", "type": "string" },
-              { "name": "productionDate", "type": "string" },
-              { "name": "deviceModel", "type": "string" },
-              { "name": "warrantyPeriod", "type": "string" },
-              { "name": "countryOfOrigin", "type": "string" },
-              { "name": "manufacturerId", "type": "string" },
-              { "name": "ipfsCid", "type": "string" },
-              { "name": "owner", "type": "publicKey" }
-            ]
-          }
-        }
-      ]
-    };
+      const provider = new AnchorProvider(connection, window.solana, {
+        preflightCommitment: 'confirmed',
+      });
 
-    return new window.Anchor.Program(idl, PROGRAM_ID, provider);
+      const idl = {
+        version: '0.1.0',
+        name: 'smart_passport',
+        instructions: [
+          {
+            name: 'initialize',
+            accounts: [
+              { name: 'manufacturerList', isMut: true, isSigner: false },
+              { name: 'admin', isMut: true, isSigner: true },
+              { name: 'systemProgram', isMut: false, isSigner: false },
+            ],
+            args: [],
+          },
+          {
+            name: 'addManufacturer',
+            accounts: [
+              { name: 'manufacturerList', isMut: true, isSigner: false },
+              { name: 'admin', isMut: false, isSigner: true },
+            ],
+            args: [{ name: 'manufacturer', type: 'publicKey' }],
+          },
+          {
+            name: 'createPassport',
+            accounts: [
+              { name: 'passport', isMut: true, isSigner: false },
+              { name: 'user', isMut: true, isSigner: true },
+              { name: 'systemProgram', isMut: false, isSigner: false },
+            ],
+            args: [
+              { name: 'serialNumber', type: 'string' },
+              { name: 'productionDate', type: 'string' },
+              { name: 'deviceModel', type: 'string' },
+              { name: 'warrantyPeriod', type: 'string' },
+              { name: 'countryOfOrigin', type: 'string' },
+              { name: 'manufacturerId', type: 'string' },
+              { name: 'ipfsCid', type: 'string' },
+              { name: 'owner', type: 'publicKey' },
+            ],
+          },
+        ],
+        accounts: [
+          {
+            name: 'ManufacturerList',
+            type: {
+              kind: 'struct',
+              fields: [{ name: 'manufacturers', type: { vec: 'publicKey' } }],
+            },
+          },
+          {
+            name: 'Passport',
+            type: {
+              kind: 'struct',
+              fields: [
+                { name: 'serialNumber', type: 'string' },
+                { name: 'productionDate', type: 'string' },
+                { name: 'deviceModel', type: 'string' },
+                { name: 'warrantyPeriod', type: 'string' },
+                { name: 'countryOfOrigin', type: 'string' },
+                { name: 'manufacturerId', type: 'string' },
+                { name: 'ipfsCid', type: 'string' },
+                { name: 'owner', type: 'publicKey' },
+              ],
+            },
+          },
+        ],
+      };
+
+      return new Program(idl, PROGRAM_ID, provider);
+    } catch (error) {
+      setStatus(`Error initializing program: ${error.message}`);
+      return null;
+    }
   };
 
   const connectWallet = async () => {
     try {
       const { solana } = window;
-      if (solana && solana.isPhantom) {
-        const response = await solana.connect();
-        const publicKey = response.publicKey.toString();
-        setWalletAddress(publicKey);
-
-        const program = await initializeProgram();
-        const [manufacturerListPda] = window.SolanaWeb3.PublicKey.findProgramAddressSync(
-          [Buffer.from("manufacturer_list")],
-          PROGRAM_ID
-        );
-        const manufacturerList = await program.account.manufacturerList.fetch(manufacturerListPda);
-        const manufacturers = manufacturerList.manufacturers.map(pk => pk.toString());
-
-        if (publicKey === ADMIN_PUBLIC_KEY) {
-          setRole('admin');
-        } else if (manufacturers.includes(publicKey)) {
-          setRole('manufacturer');
-        } else {
-          setRole('user');
-        }
-        setStatus('Wallet connected!');
-        fetchPassports();
-      } else {
+      if (!solana || !solana.isPhantom) {
         setStatus('Please install Phantom wallet.');
+        return;
       }
+
+      const response = await solana.connect();
+      const publicKey = response.publicKey.toString();
+      setWalletAddress(publicKey);
+
+      const program = await initializeProgram();
+      if (!program) return;
+
+      const [manufacturerListPda] = PublicKey.findProgramAddressSync(
+        [Buffer.from('manufacturer_list')],
+        PROGRAM_ID
+      );
+
+      // Перевірка, чи ініціалізований аккаунт ManufacturerList
+      try {
+        await program.account.manufacturerList.fetch(manufacturerListPda);
+      } catch (fetchError) {
+        if (fetchError.message.includes('Account does not exist')) {
+          if (publicKey === ADMIN_PUBLIC_KEY.toString()) {
+            await program.methods
+              .initialize()
+              .accounts({
+                manufacturerList: manufacturerListPda,
+                admin: new PublicKey(publicKey),
+                systemProgram: SystemProgram.programId,
+              })
+              .rpc();
+            setStatus('Initialized ManufacturerList account.');
+          } else {
+            setStatus('Only admin can initialize the program.');
+            return;
+          }
+        } else {
+          throw fetchError;
+        }
+      }
+
+      const manufacturerList = await program.account.manufacturerList.fetch(manufacturerListPda);
+      const manufacturers = manufacturerList.manufacturers.map((pk) => pk.toString());
+
+      if (publicKey === ADMIN_PUBLIC_KEY.toString()) {
+        setRole('admin');
+      } else if (manufacturers.includes(publicKey)) {
+        setRole('manufacturer');
+      } else {
+        setRole('user');
+      }
+      setStatus('Wallet connected!');
+      fetchPassports();
     } catch (error) {
-      setStatus('Error connecting wallet: ' + error.message);
+      setStatus(`Error connecting wallet: ${error.message}`);
     }
   };
 
@@ -143,33 +179,23 @@ const App = () => {
 
     try {
       const program = await initializeProgram();
-      const accounts = await connection.getProgramAccounts(PROGRAM_ID, {
-        filters: [
-          {
-            memcmp: {
-              offset: 0,
-              bytes: PROGRAM_ID.toBase58().slice(0, 32),
-            },
-          },
-        ],
-      });
-      const fetchedPassports = [];
+      if (!program) return;
 
-      for (const account of accounts) {
-        try {
-          const passport = await program.account.passport.fetch(account.pubkey);
-          if (passport && (role === 'user' && passport.owner.toString() === walletAddress) ||
-            (role === 'manufacturer' && passport.manufacturerId === walletAddress)) {
-            fetchedPassports.push({ ...passport, address: account.pubkey.toString() });
-          }
-        } catch (error) {
-          console.error('Error fetching passport:', error);
-        }
-      }
+      const accounts = await program.account.passport.all();
+      const fetchedPassports = accounts
+        .map((account) => ({
+          ...account.account,
+          address: account.publicKey.toString(),
+        }))
+        .filter((passport) =>
+          role === 'user'
+            ? passport.owner.toString() === walletAddress
+            : role === 'manufacturer' && passport.manufacturerId === walletAddress
+        );
 
       setPassports(fetchedPassports);
     } catch (error) {
-      setStatus('Error fetching passports: ' + error.message);
+      setStatus(`Error fetching passports: ${error.message}`);
     }
   };
 
@@ -182,32 +208,35 @@ const App = () => {
 
     try {
       const program = await initializeProgram();
-      const [manufacturerListPda] = window.SolanaWeb3.PublicKey.findProgramAddressSync(
-        [Buffer.from("manufacturer_list")],
+      if (!program) return;
+
+      const [manufacturerListPda] = PublicKey.findProgramAddressSync(
+        [Buffer.from('manufacturer_list')],
         PROGRAM_ID
       );
 
-      await program.rpc.addManufacturer(new window.SolanaWeb3.PublicKey(manufacturerAddress), {
-        accounts: {
+      await program.methods
+        .addManufacturer(new PublicKey(manufacturerAddress))
+        .accounts({
           manufacturerList: manufacturerListPda,
-          admin: new window.SolanaWeb3.PublicKey(walletAddress),
-        },
-      });
+          admin: new PublicKey(walletAddress),
+        })
+        .rpc();
 
       setStatus('Manufacturer added successfully!');
       setManufacturerAddress('');
     } catch (error) {
-      setStatus('Error adding manufacturer: ' + error.message);
+      setStatus(`Error adding manufacturer: ${error.message}`);
     }
   };
 
   const uploadToIpfs = async (file) => {
     try {
-      const ipfs = window.IpfsHttpClient.create({ url: 'https://ipfs.infura.io:5001' });
+      const ipfs = create({ url: 'https://ipfs.infura.io:5001' });
       const added = await ipfs.add(file);
       return added.path;
     } catch (error) {
-      setStatus('Error uploading to IPFS: ' + error.message);
+      setStatus(`Error uploading to IPFS: ${error.message}`);
       return null;
     }
   };
@@ -236,14 +265,14 @@ const App = () => {
     }
     const qrData = `${formData.serialNumber}-${Date.now()}`;
     setQrCodeData(qrData);
-    new window.QRCode(document.getElementById('qrcode'), {
-      text: qrData,
+    QRCode.toCanvas(document.getElementById('qrcode'), qrData, {
       width: 128,
       height: 128,
-      colorDark: '#000000',
-      colorLight: '#ffffff',
+      color: { dark: '#000000', light: '#ffffff' },
+    }, (error) => {
+      if (error) setStatus(`Error generating QR code: ${error.message}`);
+      else setStatus('QR code generated. Print and attach to product.');
     });
-    setStatus('QR code generated. Print and attach to product.');
   };
 
   const mintPassport = async (e) => {
@@ -260,33 +289,38 @@ const App = () => {
     try {
       setStatus('Minting NFT Passport...');
       const program = await initializeProgram();
-      const passportAccount = window.SolanaWeb3.Keypair.generate();
+      if (!program) return;
 
-      await program.rpc.createPassport(
-        formData.serialNumber,
-        formData.productionDate,
-        formData.deviceModel,
-        formData.warrantyPeriod,
-        formData.countryOfOrigin,
-        formData.manufacturerId,
-        formData.ipfsCid,
-        new window.SolanaWeb3.PublicKey(walletAddress),
-        {
-          accounts: {
-            passport: passportAccount.publicKey,
-            user: new window.SolanaWeb3.PublicKey(walletAddress),
-            systemProgram: window.SolanaWeb3.SystemProgram.programId,
-          },
-          signers: [passportAccount],
-        }
-      );
+      const passportAccount = Keypair.generate();
+
+      await program.methods
+        .createPassport(
+          formData.serialNumber,
+          formData.productionDate,
+          formData.deviceModel,
+          formData.warrantyPeriod,
+          formData.countryOfOrigin,
+          formData.manufacturerId,
+          formData.ipfsCid,
+          new PublicKey(walletAddress)
+        )
+        .accounts({
+          passport: passportAccount.publicKey,
+          user: new PublicKey(walletAddress),
+          systemProgram: SystemProgram.programId,
+        })
+        .signers([passportAccount])
+        .rpc();
 
       setStatus(`NFT Passport minted! Address: ${passportAccount.publicKey.toString()}`);
-      setPassports([...passports, { ...formData, address: passportAccount.publicKey.toString(), owner: walletAddress }]);
+      setPassports([
+        ...passports,
+        { ...formData, address: passportAccount.publicKey.toString(), owner: new PublicKey(walletAddress) },
+      ]);
       setQrCodeData(null);
       fetchPassports();
     } catch (error) {
-      setStatus('Error minting NFT: ' + error.message);
+      setStatus(`Error minting NFT: ${error.message}`);
     }
   };
 
@@ -308,11 +342,9 @@ const App = () => {
     const sortedPassports = [...passports].sort((a, b) => {
       const valueA = a[field]?.toString().toLowerCase() || '';
       const valueB = b[field]?.toString().toLowerCase() || '';
-      if (newOrder === 'asc') {
-        return valueA.localeCompare(valueB);
-      } else {
-        return valueB.localeCompare(valueA);
-      }
+      return newOrder === 'asc'
+        ? valueA.localeCompare(valueB)
+        : valueB.localeCompare(valueA);
     });
     setPassports(sortedPassports);
   };
@@ -345,7 +377,7 @@ const App = () => {
       {role === 'admin' && (
         <div className="bg-gray-800 p-6 rounded-lg shadow-lg mb-6">
           <h2 className="text-2xl font-semibold mb-4">Admin Panel</h2>
-          <form onSubmit={addManufacturer}>
+          <div>
             <div className="grid grid-cols-1 gap-4">
               <input
                 type="text"
@@ -357,19 +389,19 @@ const App = () => {
               />
             </div>
             <button
-              type="submit"
+              onClick={addManufacturer}
               className="mt-4 bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded w-full"
             >
               Add Manufacturer
             </button>
-          </form>
+          </div>
         </div>
       )}
 
       {role === 'manufacturer' && (
         <div className="bg-gray-800 p-6 rounded-lg shadow-lg mb-6">
           <h2 className="text-2xl font-semibold mb-4">Manufacturer Panel</h2>
-          <form onSubmit={(e) => { e.preventDefault(); generateQrCode(); }}>
+          <div>
             <div className="grid grid-cols-1 gap-4">
               <input
                 type="text"
@@ -432,15 +464,15 @@ const App = () => {
               />
             </div>
             <button
-              type="submit"
+              onClick={generateQrCode}
               className="mt-4 bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded w-full"
             >
               Generate QR Code
             </button>
-          </form>
+          </div>
           {qrCodeData && (
             <div className="mt-4 text-center">
-              <div id="qrcode"></div>
+              <canvas id="qrcode"></canvas>
               <p className="text-sm">Print this QR code and attach it to the product.</p>
             </div>
           )}
@@ -456,15 +488,15 @@ const App = () => {
           >
             Scan QR Code
           </button>
-          <form onSubmit={mintPassport} className="mt-4">
+          <div className="mt-4">
             <button
-              type="submit"
+              onClick={mintPassport}
               className="mt-4 bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded w-full"
               disabled={!qrCodeData}
             >
               Mint NFT Passport
             </button>
-          </form>
+          </div>
         </div>
       )}
 
