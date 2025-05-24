@@ -22,5 +22,8 @@ export default defineConfig({
         global: 'globalThis'
       }
     }
-  }
+  },
+  css: {
+    postcss: './postcss.config.js'
+  },
 })

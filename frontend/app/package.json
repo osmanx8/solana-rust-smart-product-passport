@@ -2,7 +2,6 @@
   "name": "my-vite-app",
   "private": true,
   "version": "0.0.0",
-  "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
@@ -12,26 +11,35 @@
   "dependencies": {
     "@project-serum/anchor": "^0.26.0",
     "@solana/web3.js": "^1.98.2",
+    "@tailwindcss/postcss": "^4.1.7",
     "browserify-zlib": "^0.2.0",
     "dotenv": "^16.5.0",
+    "framer-motion": "^12.12.2",
+    "i18next": "^25.2.0",
     "ipfs-http-client": "^60.0.1",
     "process": "^0.11.10",
     "qrcode": "^1.5.4",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
+    "react-i18next": "^15.5.2",
     "react-icons": "^5.5.0",
+    "react-router-dom": "^7.6.0",
     "stream-browserify": "^3.0.0",
     "util": "^0.12.5"
   },
   "devDependencies": {
     "@eslint/js": "^9.25.0",
+    "@tailwindcss/postcss7-compat": "^2.2.17",
     "@types/react": "^19.1.2",
     "@types/react-dom": "^19.1.2",
     "@vitejs/plugin-react": "^4.4.1",
+    "autoprefixer": "^9.8.8",
     "eslint": "^9.25.0",
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-react-refresh": "^0.4.19",
     "globals": "^16.0.0",
+    "postcss": "^7.0.39",
+    "tailwindcss": "^4.1.7",
     "vite": "^6.3.5"
   }
 }
