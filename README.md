@@ -1,25 +1,27 @@
 # Smart Product Passport
 
+> Blockchain-based solution for product authentication and documentation, enabling secure digital passports for products with QR code verification and manufacturer management. Built on Solana blockchain for high performance and security.
+
 <div align="center">
   <a href="https://arena.colosseum.org/projects/explore/smart-product-passport?previous=L3Byb2plY3RzL2V4cGxvcmU_c2VlZD1kMjk5MWNlNDQ0MmM5MmVkJmhhY2thdGhvbklkPTQmc2VhcmNoPXNt" target="_blank" rel="noopener noreferrer" style="text-decoration: none;">
     <img src="frontend/app/src/assets/SPP_logo.png" alt="Smart Product Passport Logo" width="200"/>
   </a>
   
-  <p style="background: linear-gradient(to right, #60A5FA, #A78BFA); -webkit-background-clip: text; background-clip: text; color: transparent; margin: 10px 0; font-size: 1.1em; display: flex; align-items: center; justify-content: center; gap: 8px;">
-    <span>Until June 23, 2025, you can support our product at the hackathon</span>
-    <span style="font-size: 1.2em;">👍</span>
-  </p>
+  <a href="https://arena.colosseum.org/projects/explore/smart-product-passport?previous=L3Byb2plY3RzL2V4cGxvcmU_c2VlZD1kMjk5MWNlNDQ0MmM5MmVkJmhhY2thdGhvbklkPTQmc2VhcmNoPXNt" target="_blank" rel="noopener noreferrer" style="text-decoration: none;">
+    <p style="background: linear-gradient(to right, #60A5FA, #A78BFA); -webkit-background-clip: text; background-clip: text; color: transparent; margin: 10px 0; font-size: 1.1em; display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer;">
+      <span>Until June 23, 2025, you can support our product at the hackathon</span>
+      <span style="font-size: 1.2em;">👍</span>
+    </p>
+  </a>
 
   <h3 style="color: white; margin: 20px 0 10px 0; font-size: 1.2em;">Supported by</h3>
-  <div style="background-color: black; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
-    <div style="display: flex; justify-content: center; align-items: center; gap: 40px;">
-      <a href="https://kumekateam.com/" target="_blank" rel="noopener noreferrer" style="text-decoration: none;">
-        <img src="frontend/app/src/assets/partners_logo/KumekaTeam.svg" alt="Kumeka Team Logo" height="40" style="background-color: black; padding: 8px; border-radius: 4px;" />
-      </a>
-      <a href="https://www.colosseum.org/" target="_blank" rel="noopener noreferrer" style="text-decoration: none;">
-        <img src="frontend/app/src/assets/partners_logo/Colloseum.svg" alt="Colloseum Logo" height="40" style="background-color: black; padding: 8px; border-radius: 4px;" />
-      </a>
-    </div>
+  <div style="display: flex; justify-content: center; align-items: center; gap: 40px; margin-bottom: 20px;">
+    <a href="https://kumekateam.com/" target="_blank" rel="noopener noreferrer" style="text-decoration: none;">
+      <img src="frontend/app/src/assets/partners_logo/kumeka_black.jpg" alt="Kumeka Team Logo" height="40" style="padding: 8px;" />
+    </a>
+    <a href="https://www.colosseum.org/" target="_blank" rel="noopener noreferrer" style="text-decoration: none;">
+      <img src="frontend/app/src/assets/partners_logo/colloseum_black.jpg" alt="Colloseum Logo" height="40" style="padding: 8px;" />
+    </a>
   </div>
 
   <p>
