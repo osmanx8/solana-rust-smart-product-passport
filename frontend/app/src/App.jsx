@@ -10,7 +10,7 @@ import LoadingSpinner from './components/LoadingSpinner';
 import { motion } from 'framer-motion';
 import LanguageSwitcher from './components/LanguageSwitcher';
 import { useTranslation } from 'react-i18next';
-import logo from './assets/logo.png';
+import logo from './assets/SPP_logo.png';
 import { requestAirdrop } from './utils/airdrop';
 
 const Navigation = ({ walletAddress, role, connectWallet, disconnectWallet, addManufacturer }) => {
@@ -81,7 +81,7 @@ const Navigation = ({ walletAddress, role, connectWallet, disconnectWallet, addM
         <div className="flex items-center justify-between h-16 pb-2">
           <div className="flex items-center gap-6">
             <Link to="/" className="text-white text-xl font-bold flex items-center gap-2">
-              <img src={logo} alt="Logo" className="w-8 h-8" />
+              <img src={logo} alt="Smart Product Passport Logo" className="w-10 h-10" />
               {t('title')}
             </Link>
             {!walletAddress && (
@@ -410,7 +410,7 @@ const Footer = () => {
       <span className="text-sm">{t('footer_text')}</span>
       <div className="flex gap-4 justify-center mt-2">
         <a
-          href="https://twitter.com/yourproject"
+          href="https://x.com/SmartProductID"
           target="_blank"
           rel="noopener noreferrer"
           className="text-blue-400 hover:text-blue-300 transition-colors text-xl"
