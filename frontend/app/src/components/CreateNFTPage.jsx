@@ -2,7 +2,7 @@ import React from 'react';
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
-import { FaUpload, FaImage, FaSpinner, FaQrcode } from 'react-icons/fa';
+import { FaUpload, FaImage, FaSpinner, FaQrcode, FaCalendarAlt } from 'react-icons/fa';
 import QRCode from 'qrcode.react';
 
 const API_URL = 'http://localhost:3000/api'; // URL вашого бекенду
@@ -119,14 +119,17 @@ const CreateNFTPage = ({ mintPassport, handleInputChange, handleFileChange, form
                   <label className="block text-sm font-medium text-gray-300 mb-2">
                     Production Date
                   </label>
-                  <input
-                    type="date"
-                    name="productionDate"
-                    value={formData.productionDate}
-                    onChange={handleInputChange}
-                    required
-                    className="w-full bg-gray-700/50 text-white px-4 py-2 rounded-lg border border-gray-600 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors"
-                  />
+                  <div className="relative">
+                    <input
+                      type="date"
+                      name="productionDate"
+                      value={formData.productionDate}
+                      onChange={handleInputChange}
+                      required
+                      className="w-full bg-gray-700/50 text-white px-4 py-2 rounded-lg border border-gray-600 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors pl-10"
+                    />
+                    <FaCalendarAlt className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white" />
+                  </div>
                 </div>
 
                 <div>
@@ -223,13 +226,23 @@ const CreateNFTPage = ({ mintPassport, handleInputChange, handleFileChange, form
             <div className="bg-gray-800/50 p-8 rounded-2xl border border-gray-700/50">
               <h2 className="text-xl font-semibold text-white mb-4">Upload Documentation</h2>
               <div className="space-y-4">
+                <div className="mb-4">
+                  <h3 className="text-sm font-medium text-gray-300 mb-2">Instructions:</h3>
+                  <ul className="text-sm text-gray-400 list-disc list-inside space-y-1">
+                    <li>Upload a clear product image (required)</li>
+                    <li>Supported image formats: JPG, PNG, WebP</li>
+                    <li>Maximum file size: 5MB</li>
+                    <li>For best results, use square images (1:1 ratio)</li>
+                  </ul>
+                </div>
                 <div className="border-2 border-dashed border-gray-600 rounded-lg p-8 text-center">
                   <input
                     type="file"
                     onChange={handleFileUpload}
                     className="hidden"
                     id="file-upload"
-                    accept="image/*,.pdf,.doc,.docx"
+                    accept="image/*"
+                    required
                   />
                   <label
                     htmlFor="file-upload"
@@ -237,13 +250,18 @@ const CreateNFTPage = ({ mintPassport, handleInputChange, handleFileChange, form
                   >
                     <FaImage className="w-12 h-12 text-gray-400 mb-4" />
                     <span className="text-gray-300 mb-2">
-                      {file ? file.name : 'Click to upload documentation'}
+                      {file ? file.name : 'Click to upload product image'}
                     </span>
                     <span className="text-sm text-gray-400">
-                      Supported formats: PDF, DOC, DOCX, Images
+                      Required: Product image (JPG, PNG, WebP)
                     </span>
                   </label>
                 </div>
+                {!file && (
+                  <p className="text-sm text-red-400 mt-2">
+                    * Product image is required
+                  </p>
+                )}
               </div>
             </div>
 

@@ -34,5 +34,16 @@
   "about_us": "About Us",
   "about_us_text1": "Smart Product Passport is an innovative solution for creating and managing digital product passports. Our platform uses the Solana blockchain for data security and transparency.",
   "about_us_text2": "We provide tools for manufacturers, dealers, and end users to create, verify, and manage digital product passports.",
-  "about_us_text3": "Our mission is to make product tracking and verification more efficient and secure."
+  "about_us_text3": "Our mission is to make product tracking and verification more efficient and secure.",
+  "faq_title": "Frequently Asked Questions",
+  "faq_manufacturer_q": "How can manufacturers use Smart Product Passport?",
+  "faq_manufacturer_a": "Manufacturers can create digital passports for their products, including detailed information about manufacturing date, warranty, and authenticity. This helps in product tracking, warranty management, and combating counterfeiting.",
+  "faq_consumer_q": "How does Smart Product Passport benefit consumers?",
+  "faq_consumer_a": "Consumers can verify product authenticity, access warranty information, and view product history by simply scanning a QR code. This ensures they're purchasing genuine products and helps with warranty claims.",
+  "faq_retailer_q": "What advantages does Smart Product Passport offer to retailers?",
+  "faq_retailer_a": "Retailers can verify product authenticity, manage inventory more effectively, and provide better customer service by having instant access to product information. It also helps in building trust with customers.",
+  "faq_warranty_q": "How does the warranty system work?",
+  "faq_warranty_a": "Each product passport contains warranty information that is stored on the blockchain. This ensures warranty data cannot be tampered with and provides a transparent record of warranty terms and conditions.",
+  "faq_authenticity_q": "How can I verify product authenticity?",
+  "faq_authenticity_a": "Simply scan the QR code on the product using our app. The system will instantly verify the product's authenticity by checking its digital passport on the blockchain, providing you with detailed product information and history."
 } 

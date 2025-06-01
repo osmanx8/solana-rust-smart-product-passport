@@ -10,8 +10,9 @@ import LoadingSpinner from './components/LoadingSpinner';
 import { motion } from 'framer-motion';
 import LanguageSwitcher from './components/LanguageSwitcher';
 import { useTranslation } from 'react-i18next';
-import logo from './assets/SPP_logo_white.png';
+import logo from './assets/SPP_logo.png';
 import { requestAirdrop } from './utils/airdrop';
+import FAQ from './components/FAQ';
 
 const Navigation = ({ walletAddress, role, connectWallet, disconnectWallet, addManufacturer }) => {
   const { t } = useTranslation();
@@ -80,8 +81,8 @@ const Navigation = ({ walletAddress, role, connectWallet, disconnectWallet, addM
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 pb-2">
           <div className="flex items-center gap-6">
-            <Link to="/" className="text-white text-xl font-bold flex items-center gap-2">
-              <img src={logo} alt="Smart Product Passport Logo" className="w-8" />
+            <Link to="/" className="text-white text-xl font-bold flex items-center gap-2 py-4">
+              <img src={logo} alt="Smart Product Passport Logo" className="w-16" />
               {t('title')}
             </Link>
             {!walletAddress && (
@@ -375,6 +376,7 @@ const LandingPage = () => {
             </div>
           </div>
         </motion.div>
+        <FAQ />
       </div>
     </div>
   );
