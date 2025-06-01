@@ -4,8 +4,8 @@
   <img src="frontend/app/src/assets/SPP_logo.png" alt="Smart Product Passport Logo" width="200"/>
   
   <p>
-    <img src="frontend/app/src/assets/partners_logo/KumekaTeam.svg" alt="Kumeka Team Logo" height="40" style="margin: 0 20px" />
-    <img src="frontend/app/src/assets/partners_logo/Colloseum.svg" alt="Colloseum Logo" height="40" style="margin: 0 20px" />
+    <img src="frontend/app/src/assets/partners_logo/KumekaTeam.svg" alt="Kumeka Team Logo" height="40" style="margin: 0 20px; background-color: black; padding: 8px; border-radius: 4px;" />
+    <img src="frontend/app/src/assets/partners_logo/Colloseum.svg" alt="Colloseum Logo" height="40" style="margin: 0 20px; background-color: black; padding: 8px; border-radius: 4px;" />
   </p>
 
   <p>
