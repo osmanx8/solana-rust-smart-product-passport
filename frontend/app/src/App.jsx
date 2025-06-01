@@ -1,8 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Connection, PublicKey, Keypair, SystemProgram } from '@solana/web3.js';
 import { AnchorProvider, Program } from '@project-serum/anchor';
-import { Buffer } from 'buffer';
-import { FaWallet, FaHome, FaPassport, FaQrcode, FaInfoCircle, FaTwitter, FaImage } from 'react-icons/fa';
+import { FaWallet, FaHome, FaPassport, FaQrcode, FaInfoCircle, FaTwitter, FaImage, FaUserShield, FaIndustry, FaUser } from 'react-icons/fa';
 import { BrowserRouter as Router, Routes, Route, Link, Navigate } from 'react-router-dom';
 import PassportsPage from './components/PassportsPage';
 import ScanPage from './components/ScanPage';
@@ -14,13 +13,14 @@ import { useTranslation } from 'react-i18next';
 import logo from './assets/logo.png';
 import { requestAirdrop } from './utils/airdrop';
 
-window.Buffer = Buffer;
-
 const Navigation = ({ walletAddress, role, connectWallet, disconnectWallet, addManufacturer }) => {
   const { t } = useTranslation();
   const [newManufacturerAddress, setNewManufacturerAddress] = useState('');
   const [newManufacturerName, setNewManufacturerName] = useState('');
   const [isRequestingAirdrop, setIsRequestingAirdrop] = useState(false);
+  const [showUserMenu, setShowUserMenu] = useState(false);
+
+  console.log('Navigation render - Role:', role);
 
   const handleAddManufacturer = async (e) => {
     e.preventDefault();
@@ -48,6 +48,28 @@ const Navigation = ({ walletAddress, role, connectWallet, disconnectWallet, addM
     }
   };
 
+  const getRoleIcon = (role) => {
+    switch (role) {
+      case 'admin':
+        return <FaUserShield className="w-3.5 h-3.5" />;
+      case 'manufacturer':
+        return <FaIndustry className="w-3.5 h-3.5" />;
+      default:
+        return <FaUser className="w-3.5 h-3.5" />;
+    }
+  };
+
+  const getRoleColor = (role) => {
+    switch (role) {
+      case 'admin':
+        return 'bg-purple-500/10 text-purple-400 border-purple-500/20';
+      case 'manufacturer':
+        return 'bg-green-500/10 text-green-400 border-green-500/20';
+      default:
+        return 'bg-blue-500/10 text-blue-400 border-blue-500/20';
+    }
+  };
+
   return (
     <motion.nav 
       initial={{ y: -100 }}
@@ -62,29 +84,18 @@ const Navigation = ({ walletAddress, role, connectWallet, disconnectWallet, addM
               <img src={logo} alt="Logo" className="w-8 h-8" />
               {t('title')}
             </Link>
-            <div className="hidden md:block ml-10">
-              <div className="flex items-baseline space-x-4">
-                <NavLink to="/" className="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium flex items-center transition-colors">
-                  <FaHome className="mr-2" /> {t('main')}
-                </NavLink>
-                {walletAddress && (
-                  <>
-                    <NavLink to="/create-nft" className="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium flex items-center transition-colors">
-                      <FaImage className="mr-2" /> {t('create_nft')}
-                    </NavLink>
-                    <NavLink to="/passports" className="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium flex items-center transition-colors">
-                      <FaPassport className="mr-2" /> {t('passports')}
-                    </NavLink>
-                    <NavLink to="/scan" className="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium flex items-center transition-colors">
-                      <FaQrcode className="mr-2" /> {t('scan')}
-                    </NavLink>
-                  </>
-                )}
-                <NavLink to="/about" className="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium flex items-center transition-colors">
-                  <FaInfoCircle className="mr-2" /> {t('about')}
-                </NavLink>
+            {!walletAddress && (
+              <div className="hidden md:block ml-10">
+                <div className="flex items-baseline space-x-4">
+                  <NavLink to="/" className="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium flex items-center transition-colors">
+                    <FaHome className="mr-2" /> {t('main')}
+                  </NavLink>
+                  <NavLink to="/about" className="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium flex items-center transition-colors">
+                    <FaInfoCircle className="mr-2" /> {t('about')}
+                  </NavLink>
+                </div>
               </div>
-            </div>
+            )}
           </div>
           <div className="flex items-center gap-4">
             <LanguageSwitcher />
@@ -92,73 +103,123 @@ const Navigation = ({ walletAddress, role, connectWallet, disconnectWallet, addM
               <motion.div 
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
-                className="flex items-center gap-3"
+                className="relative"
               >
-                {role === 'admin' && (
-                  <form onSubmit={handleAddManufacturer} className="flex items-center gap-2">
-                    <input
-                      type="text"
-                      value={newManufacturerAddress}
-                      onChange={(e) => setNewManufacturerAddress(e.target.value)}
-                      placeholder="Manufacturer address"
-                      className="bg-gray-800 text-white px-3 py-1 rounded-lg text-sm border border-gray-700 focus:border-blue-500 focus:outline-none"
-                    />
-                    <input
-                      type="text"
-                      value={newManufacturerName}
-                      onChange={(e) => setNewManufacturerName(e.target.value)}
-                      placeholder="Manufacturer name"
-                      className="bg-gray-800 text-white px-3 py-1 rounded-lg text-sm border border-gray-700 focus:border-blue-500 focus:outline-none"
-                    />
-                    <motion.button
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                      type="submit"
-                      className="px-3 py-1 rounded-lg bg-green-500/10 text-green-400 border border-green-500/20 hover:bg-green-500/20 transition-all text-sm"
-                    >
-                      Add Manufacturer
-                    </motion.button>
-                  </form>
-                )}
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={handleRequestAirdrop}
-                  disabled={isRequestingAirdrop}
-                  className={`px-3 py-1 rounded-lg ${
-                    isRequestingAirdrop 
-                      ? 'bg-gray-500/10 text-gray-400 border-gray-500/20' 
-                      : 'bg-purple-500/10 text-purple-400 border-purple-500/20 hover:bg-purple-500/20'
-                  } border transition-all text-sm flex items-center gap-2`}
+                <button
+                  onClick={() => setShowUserMenu(!showUserMenu)}
+                  className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gray-800/50 text-white border border-gray-700/50 hover:bg-gray-700/50 transition-all"
                 >
-                  {isRequestingAirdrop ? (
-                    <>
-                      <div className="w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin" />
-                      Requesting...
-                    </>
-                  ) : (
-                    <>
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
-                      Get Test SOL
-                    </>
+                  <FaWallet className="text-gray-400" />
+                  <div className="text-gray-300 text-sm font-mono">
+                    {walletAddress.slice(0, 4)}...{walletAddress.slice(-4)}
+                  </div>
+                  {role && (
+                    <div className={`text-sm px-2 py-1 rounded-full flex items-center gap-1.5 border ${getRoleColor(role)}`}>
+                      {getRoleIcon(role)}
+                      <span className="capitalize">{role}</span>
+                    </div>
                   )}
-                </motion.button>
-                <div className="text-gray-300 text-sm bg-gray-800/50 px-4 py-2 rounded-lg border border-gray-700/50">
-                  {walletAddress.slice(0, 4)}...{walletAddress.slice(-4)}
-                </div>
-                <div className="text-sm px-3 py-1 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/20">
-                  {role}
-                </div>
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={disconnectWallet}
-                  className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-red-500/10 text-red-400 border border-red-500/20 hover:bg-red-500/20 transition-all"
-                >
-                  {t('disconnect')}
-                </motion.button>
+                </button>
+
+                {showUserMenu && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="absolute right-0 mt-2 w-64 bg-gray-800 rounded-lg shadow-xl border border-gray-700/50 py-2"
+                  >
+                    <div className="px-4 py-2 border-b border-gray-700/50">
+                      <div className="text-sm text-gray-400 mb-1">Wallet Address</div>
+                      <div className="text-white font-mono text-sm break-all bg-gray-700/30 p-2 rounded">
+                        {walletAddress}
+                      </div>
+                    </div>
+
+                    <div className="p-2 space-y-2">
+                      {role === 'admin' && (
+                        <form onSubmit={handleAddManufacturer} className="p-2 bg-gray-700/30 rounded-lg space-y-2">
+                          <input
+                            type="text"
+                            value={newManufacturerAddress}
+                            onChange={(e) => setNewManufacturerAddress(e.target.value)}
+                            placeholder="Manufacturer address"
+                            className="w-full bg-gray-800 text-white px-3 py-1 rounded-lg text-sm border border-gray-700 focus:border-blue-500 focus:outline-none"
+                          />
+                          <input
+                            type="text"
+                            value={newManufacturerName}
+                            onChange={(e) => setNewManufacturerName(e.target.value)}
+                            placeholder="Manufacturer name"
+                            className="w-full bg-gray-800 text-white px-3 py-1 rounded-lg text-sm border border-gray-700 focus:border-blue-500 focus:outline-none"
+                          />
+                          <motion.button
+                            whileHover={{ scale: 1.02 }}
+                            whileTap={{ scale: 0.98 }}
+                            type="submit"
+                            className="w-full px-3 py-1 rounded-lg bg-green-500/10 text-green-400 border border-green-500/20 hover:bg-green-500/20 transition-all text-sm"
+                          >
+                            Add Manufacturer
+                          </motion.button>
+                        </form>
+                      )}
+
+                      <motion.button
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        onClick={handleRequestAirdrop}
+                        disabled={isRequestingAirdrop}
+                        className={`w-full px-3 py-2 rounded-lg ${
+                          isRequestingAirdrop 
+                            ? 'bg-gray-500/10 text-gray-400 border-gray-500/20' 
+                            : 'bg-purple-500/10 text-purple-400 border-purple-500/20 hover:bg-purple-500/20'
+                        } border transition-all text-sm flex items-center justify-center gap-2`}
+                      >
+                        {isRequestingAirdrop ? (
+                          <>
+                            <div className="w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin" />
+                            Requesting...
+                          </>
+                        ) : (
+                          <>
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            Get SOL Airdrop
+                          </>
+                        )}
+                      </motion.button>
+
+                      <Link
+                        to="/create-nft"
+                        className="block w-full px-3 py-2 rounded-lg bg-blue-500/10 text-blue-400 border border-blue-500/20 hover:bg-blue-500/20 transition-all text-sm text-center"
+                      >
+                        Create Product Passport
+                      </Link>
+
+                      <Link
+                        to="/passports"
+                        className="block w-full px-3 py-2 rounded-lg bg-blue-500/10 text-blue-400 border border-blue-500/20 hover:bg-blue-500/20 transition-all text-sm text-center"
+                      >
+                        My Passports
+                      </Link>
+
+                      <Link
+                        to="/scan"
+                        className="block w-full px-3 py-2 rounded-lg bg-blue-500/10 text-blue-400 border border-blue-500/20 hover:bg-blue-500/20 transition-all text-sm text-center"
+                      >
+                        Scan Passport
+                      </Link>
+
+                      <motion.button
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        onClick={disconnectWallet}
+                        className="w-full px-3 py-2 rounded-lg bg-red-500/10 text-red-400 border border-red-500/20 hover:bg-red-500/20 transition-all text-sm"
+                      >
+                        {t('disconnect')}
+                      </motion.button>
+                    </div>
+                  </motion.div>
+                )}
               </motion.div>
             ) : (
               <motion.button
@@ -465,7 +526,8 @@ const App = () => {
       const response = await solana.connect();
       const publicKey = response.publicKey.toString();
       setWalletAddress(publicKey);
-      
+      console.log('Connected wallet:', publicKey);
+
       const program = await initializeProgram();
       if (!program) return;
 
@@ -476,20 +538,29 @@ const App = () => {
       let manufacturerList;
       try {
         manufacturerList = await program.account.manufacturerList.fetch(manufacturerListPda);
-      } catch {
+        console.log('Manufacturer list:', manufacturerList);
+      } catch (err) {
+        console.log('Error fetching manufacturer list:', err);
         manufacturerList = null;
       }
 
       const manufacturers = (manufacturerList?.manufacturers || []).map((pk) => pk.toString());
+      console.log('Manufacturers:', manufacturers);
+      console.log('Admin key:', ADMIN_PUBLIC_KEY.toString());
+
       if (publicKey === ADMIN_PUBLIC_KEY.toString()) {
+        console.log('Setting role: admin');
         setRole('admin');
         // Автоматично ініціалізуємо список виробників, якщо адмін підключився
         await initializeManufacturerList();
       } else if (manufacturers.includes(publicKey)) {
+        console.log('Setting role: manufacturer');
         setRole('manufacturer');
       } else {
+        console.log('Setting role: user');
         setRole('user');
       }
+
       setStatus('Wallet connected!');
       await fetchPassports();
     } catch (error) {
@@ -562,8 +633,8 @@ const App = () => {
           formData.deviceModel,
           formData.warrantyPeriod,
           formData.countryOfOrigin,
-          formData.manufacturerId || walletAddress, // Використовуємо адресу гаманця як manufacturerId, якщо не вказано
-          '', // Поки що не використовуємо NFT
+          formData.manufacturerId || walletAddress,
+          '',
           new PublicKey(walletAddress)
         )
         .accounts({
@@ -575,6 +646,8 @@ const App = () => {
 
       console.log('Transaction signature:', tx);
       setStatus('Passport created successfully!');
+      
+      // Очищаємо форму
       setFormData({
         serialNumber: '',
         productionDate: '',
@@ -585,7 +658,12 @@ const App = () => {
         ipfsCid: '',
       });
       setFile(null);
+
+      // Оновлюємо список паспортів
       await fetchPassports();
+
+      // Перенаправляємо на сторінку паспортів
+      window.location.href = '/passports';
     } catch (error) {
       console.error('Error creating passport:', error);
       let errorMessage = error.message;

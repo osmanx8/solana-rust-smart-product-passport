@@ -21,6 +21,11 @@ body {
   color: var(--text);
 }
 
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}
+
 /* Custom animations */
 @keyframes pulse {
   0%, 100% {
