@@ -13,6 +13,7 @@ import { useTranslation } from 'react-i18next';
 import logo from './assets/SPP_logo.png';
 import { requestAirdrop } from './utils/airdrop';
 import FAQ from './components/FAQ';
+import Community from './components/Community';
 
 const Navigation = ({ walletAddress, role, connectWallet, disconnectWallet, addManufacturer }) => {
   const { t } = useTranslation();
@@ -378,6 +379,9 @@ const LandingPage = () => {
         </motion.div>
         <FAQ />
       </div>
+
+      {/* Додаємо компонент Community */}
+      <Community />
     </div>
   );
 };
