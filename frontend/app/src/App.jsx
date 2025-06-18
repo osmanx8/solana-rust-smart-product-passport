@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Connection, PublicKey, Keypair, SystemProgram } from '@solana/web3.js';
 import { AnchorProvider, Program } from '@project-serum/anchor';
-import { FaWallet, FaHome, FaPassport, FaQrcode, FaInfoCircle, FaTwitter, FaImage, FaUserShield, FaIndustry, FaUser } from 'react-icons/fa';
 import { BrowserRouter as Router, Routes, Route, Link, Navigate } from 'react-router-dom';
 import PassportsPage from './components/PassportsPage';
 import ScanPage from './components/ScanPage';
@@ -14,6 +13,42 @@ import logo from './assets/SPP_logo.png';
 import { requestAirdrop } from './utils/airdrop';
 import FAQ from './components/FAQ';
 import Community from './components/Community';
+import ThreeDBoxSection from './components/ThreeDBoxSection';
+import {
+  HomeIcon,
+  InformationCircleIcon,
+  BuildingOfficeIcon,
+  ShoppingBagIcon,
+  UserIcon,
+  PlusIcon,
+  DocumentTextIcon,
+  CameraIcon,
+  ArrowRightOnRectangleIcon,
+  HeartIcon,
+  CircleStackIcon,
+  GiftIcon,
+  StarIcon,
+  FlagIcon,
+  RocketLaunchIcon,
+  HandThumbUpIcon,
+  UsersIcon,
+  CheckCircleIcon,
+  LightBulbIcon,
+  ShieldCheckIcon,
+  DevicePhoneMobileIcon,
+  EyeIcon,
+  BoltIcon,
+  ArrowRightIcon,
+  CogIcon,
+  LockClosedIcon,
+  MagnifyingGlassIcon,
+  ClockIcon,
+  ChevronDownIcon,
+  QrCodeIcon,
+  XMarkIcon,
+  ArrowTopRightOnSquareIcon,
+  CreditCardIcon
+} from '@heroicons/react/24/outline';
 
 const Navigation = ({ walletAddress, role, connectWallet, disconnectWallet, addManufacturer }) => {
   const { t } = useTranslation();
@@ -34,7 +69,7 @@ const Navigation = ({ walletAddress, role, connectWallet, disconnectWallet, addM
 
   const handleRequestAirdrop = async () => {
     if (!walletAddress || isRequestingAirdrop) return;
-    
+
     setIsRequestingAirdrop(true);
     try {
       const result = await requestAirdrop(walletAddress);
@@ -53,11 +88,15 @@ const Navigation = ({ walletAddress, role, connectWallet, disconnectWallet, addM
   const getRoleIcon = (role) => {
     switch (role) {
       case 'admin':
-        return <FaUserShield className="w-3.5 h-3.5" />;
+        return <StarIcon className="w-4 h-4 text-yellow-400" />;
       case 'manufacturer':
-        return <FaIndustry className="w-3.5 h-3.5" />;
+        return <BuildingOfficeIcon className="w-4 h-4 text-blue-400" />;
+      case 'dealer':
+        return <ShoppingBagIcon className="w-4 h-4 text-green-400" />;
+      case 'consumer':
+        return <UserIcon className="w-4 h-4 text-purple-400" />;
       default:
-        return <FaUser className="w-3.5 h-3.5" />;
+        return <UserIcon className="w-4 h-4 text-gray-400" />;
     }
   };
 
@@ -73,7 +112,7 @@ const Navigation = ({ walletAddress, role, connectWallet, disconnectWallet, addM
   };
 
   return (
-    <motion.nav 
+    <motion.nav
       initial={{ y: -100 }}
       animate={{ y: 0 }}
       className="bg-gray-900 fixed w-full top-0 z-50 border-b border-gray-800 shadow-lg"
@@ -86,14 +125,28 @@ const Navigation = ({ walletAddress, role, connectWallet, disconnectWallet, addM
               <img src={logo} alt="Smart Product Passport Logo" className="w-16" />
               {t('title')}
             </Link>
-            {!walletAddress && (
+            {walletAddress && (
               <div className="hidden md:block ml-10">
                 <div className="flex items-baseline space-x-4">
                   <NavLink to="/" className="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium flex items-center transition-colors">
-                    <FaHome className="mr-2" /> {t('main')}
+                    <HomeIcon className="w-4 h-4 mr-2" />
+                    {t('main')}
+                  </NavLink>
+                  <NavLink to="/passports" className="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium flex items-center transition-colors">
+                    <DocumentTextIcon className="w-4 h-4 mr-2" />
+                    {t('passports')}
+                  </NavLink>
+                  <NavLink to="/scan" className="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium flex items-center transition-colors">
+                    <CameraIcon className="w-4 h-4 mr-2" />
+                    {t('scan')}
+                  </NavLink>
+                  <NavLink to="/create-nft" className="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium flex items-center transition-colors">
+                    <PlusIcon className="w-4 h-4 mr-2" />
+                    {t('createNFT')}
                   </NavLink>
                   <NavLink to="/about" className="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium flex items-center transition-colors">
-                    <FaInfoCircle className="mr-2" /> {t('about')}
+                    <InformationCircleIcon className="w-4 h-4 mr-2" />
+                    {t('about')}
                   </NavLink>
                 </div>
               </div>
@@ -102,16 +155,16 @@ const Navigation = ({ walletAddress, role, connectWallet, disconnectWallet, addM
           <div className="flex items-center gap-4">
             <LanguageSwitcher />
             {walletAddress ? (
-              <motion.div 
+              <motion.div
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
                 className="relative"
               >
                 <button
                   onClick={() => setShowUserMenu(!showUserMenu)}
-                  className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gray-800/50 text-white border border-gray-700/50 hover:bg-gray-700/50 transition-all"
+                  className="flex items-center gap-3 px-4 py-2 rounded-lg backdrop-blur-md bg-white/10 text-white border border-white/20 hover:bg-white/20 hover:border-white/30 transition-all duration-300 shadow-lg"
                 >
-                  <FaWallet className="text-gray-400" />
+                  <CreditCardIcon className="w-5 h-5 text-white" />
                   <div className="text-gray-300 text-sm font-mono">
                     {walletAddress.slice(0, 4)}...{walletAddress.slice(-4)}
                   </div>
@@ -125,113 +178,55 @@ const Navigation = ({ walletAddress, role, connectWallet, disconnectWallet, addM
 
                 {showUserMenu && (
                   <motion.div
-                    initial={{ opacity: 0, y: 10 }}
+                    initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="absolute right-0 mt-2 w-64 bg-gray-800 rounded-lg shadow-xl border border-gray-700/50 py-2"
+                    className="absolute top-full right-0 mt-2 w-48 bg-gray-800 rounded-lg shadow-xl border border-gray-700/50 py-2 z-50"
                   >
-                    <div className="px-4 py-2 border-b border-gray-700/50">
-                      <div className="text-sm text-gray-400 mb-1">Wallet Address</div>
-                      <div className="text-white font-mono text-sm break-all bg-gray-700/30 p-2 rounded">
-                        {walletAddress}
-                      </div>
-                    </div>
-
-                    <div className="p-2 space-y-2">
-                      {role === 'admin' && (
-                        <form onSubmit={handleAddManufacturer} className="p-2 bg-gray-700/30 rounded-lg space-y-2">
-                          <input
-                            type="text"
-                            value={newManufacturerAddress}
-                            onChange={(e) => setNewManufacturerAddress(e.target.value)}
-                            placeholder="Manufacturer address"
-                            className="w-full bg-gray-800 text-white px-3 py-1 rounded-lg text-sm border border-gray-700 focus:border-blue-500 focus:outline-none"
-                          />
-                          <input
-                            type="text"
-                            value={newManufacturerName}
-                            onChange={(e) => setNewManufacturerName(e.target.value)}
-                            placeholder="Manufacturer name"
-                            className="w-full bg-gray-800 text-white px-3 py-1 rounded-lg text-sm border border-gray-700 focus:border-blue-500 focus:outline-none"
-                          />
-                          <motion.button
-                            whileHover={{ scale: 1.02 }}
-                            whileTap={{ scale: 0.98 }}
-                            type="submit"
-                            className="w-full px-3 py-1 rounded-lg bg-green-500/10 text-green-400 border border-green-500/20 hover:bg-green-500/20 transition-all text-sm"
-                          >
-                            Add Manufacturer
-                          </motion.button>
-                        </form>
-                      )}
-
-                      <motion.button
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                        onClick={handleRequestAirdrop}
-                        disabled={isRequestingAirdrop}
-                        className={`w-full px-3 py-2 rounded-lg ${
-                          isRequestingAirdrop 
-                            ? 'bg-gray-500/10 text-gray-400 border-gray-500/20' 
-                            : 'bg-purple-500/10 text-purple-400 border-purple-500/20 hover:bg-purple-500/20'
-                        } border transition-all text-sm flex items-center justify-center gap-2`}
-                      >
-                        {isRequestingAirdrop ? (
-                          <>
-                            <div className="w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin" />
-                            Requesting...
-                          </>
-                        ) : (
-                          <>
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                            Get SOL Airdrop
-                          </>
-                        )}
-                      </motion.button>
-
-                      <Link
-                        to="/create-nft"
-                        className="block w-full px-3 py-2 rounded-lg bg-blue-500/10 text-blue-400 border border-blue-500/20 hover:bg-blue-500/20 transition-all text-sm text-center"
-                      >
-                        Create Product Passport
-                      </Link>
-
-                      <Link
-                        to="/passports"
-                        className="block w-full px-3 py-2 rounded-lg bg-blue-500/10 text-blue-400 border border-blue-500/20 hover:bg-blue-500/20 transition-all text-sm text-center"
-                      >
-                        My Passports
-                      </Link>
-
-                      <Link
-                        to="/scan"
-                        className="block w-full px-3 py-2 rounded-lg bg-blue-500/10 text-blue-400 border border-blue-500/20 hover:bg-blue-500/20 transition-all text-sm text-center"
-                      >
-                        Scan Passport
-                      </Link>
-
-                      <motion.button
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                        onClick={disconnectWallet}
-                        className="w-full px-3 py-2 rounded-lg bg-red-500/10 text-red-400 border border-red-500/20 hover:bg-red-500/20 transition-all text-sm"
-                      >
-                        {t('disconnect')}
-                      </motion.button>
-                    </div>
+                    <Link
+                      to="/passports"
+                      className="flex items-center gap-2 px-4 py-2 text-gray-300 hover:text-white hover:bg-gray-700/50 transition-colors"
+                      onClick={() => setShowUserMenu(false)}
+                    >
+                      <DocumentTextIcon className="w-4 h-4" />
+                      {t('passports')}
+                    </Link>
+                    <Link
+                      to="/create-nft"
+                      className="flex items-center gap-2 px-4 py-2 text-gray-300 hover:text-white hover:bg-gray-700/50 transition-colors"
+                      onClick={() => setShowUserMenu(false)}
+                    >
+                      <PlusIcon className="w-4 h-4" />
+                      {t('create_passport')}
+                    </Link>
+                    <Link
+                      to="/scan"
+                      className="flex items-center gap-2 px-4 py-2 text-gray-300 hover:text-white hover:bg-gray-700/50 transition-colors"
+                      onClick={() => setShowUserMenu(false)}
+                    >
+                      <CameraIcon className="w-4 h-4" />
+                      {t('scan')}
+                    </Link>
+                    <button
+                      onClick={() => {
+                        disconnectWallet();
+                        setShowUserMenu(false);
+                      }}
+                      className="w-full flex items-center gap-2 px-4 py-2 text-gray-300 hover:text-white hover:bg-gray-700/50 transition-colors"
+                    >
+                      <ArrowRightOnRectangleIcon className="w-4 h-4" />
+                      Disconnect
+                    </button>
                   </motion.div>
                 )}
               </motion.div>
             ) : (
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
+              <button
                 onClick={connectWallet}
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-blue-500 to-purple-500 text-white text-sm font-medium transition-all hover:shadow-lg hover:shadow-blue-500/25"
+                className="backdrop-blur-md bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 transition-all duration-300 border border-white/20 hover:border-white/30 shadow-lg"
               >
-                <FaWallet /> {t('connect_wallet')}
-              </motion.button>
+                <CreditCardIcon className="w-5 h-5 text-white" />
+                {t('connectWallet')}
+              </button>
             )}
           </div>
         </div>
@@ -258,7 +253,7 @@ const LandingPage = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black pt-20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
@@ -271,7 +266,6 @@ const LandingPage = () => {
             {t('secure_storage_desc')}
           </p>
         </motion.div>
-        {/* 3D Box with QR code block */}
         <motion.div
           id="scan3d"
           initial={{ opacity: 0, y: 40 }}
@@ -303,9 +297,7 @@ const LandingPage = () => {
             className="bg-gradient-to-br from-gray-800 to-gray-900 p-8 rounded-2xl shadow-xl border border-gray-700/50 hover:border-blue-500/50 transition-all duration-300"
           >
             <div className="h-12 w-12 bg-blue-500/10 rounded-xl flex items-center justify-center mb-6">
-              <svg className="w-6 h-6 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-              </svg>
+              <ShieldCheckIcon className="w-8 h-8 text-blue-400" />
             </div>
             <h3 className="text-xl font-bold text-white mb-4">{t('secure_storage')}</h3>
             <p className="text-gray-400 leading-relaxed">
@@ -320,9 +312,7 @@ const LandingPage = () => {
             className="bg-gradient-to-br from-gray-800 to-gray-900 p-8 rounded-2xl shadow-xl border border-gray-700/50 hover:border-purple-500/50 transition-all duration-300"
           >
             <div className="h-12 w-12 bg-purple-500/10 rounded-xl flex items-center justify-center mb-6">
-              <svg className="w-6 h-6 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v4m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
-              </svg>
+              <QrCodeIcon className="w-8 h-8 text-purple-400" />
             </div>
             <h3 className="text-xl font-bold text-white mb-4">{t('qr_codes')}</h3>
             <p className="text-gray-400 leading-relaxed">
@@ -337,9 +327,7 @@ const LandingPage = () => {
             className="bg-gradient-to-br from-gray-800 to-gray-900 p-8 rounded-2xl shadow-xl border border-gray-700/50 hover:border-green-500/50 transition-all duration-300"
           >
             <div className="h-12 w-12 bg-green-500/10 rounded-xl flex items-center justify-center mb-6">
-              <svg className="w-6 h-6 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
+              <CheckCircleIcon className="w-8 h-8 text-green-400" />
             </div>
             <h3 className="text-xl font-bold text-white mb-4">{t('authenticity_check')}</h3>
             <p className="text-gray-400 leading-relaxed">
@@ -356,22 +344,30 @@ const LandingPage = () => {
           <h2 className="text-3xl font-bold text-white mb-8">{t('how_it_works')}</h2>
           <div className="grid md:grid-cols-4 gap-6 max-w-5xl mx-auto">
             <div className="bg-gray-800/30 p-6 rounded-xl border border-gray-700/50">
-              <div className="text-2xl font-bold text-blue-400 mb-2">1</div>
+              <div className="text-2xl font-bold text-blue-400 mb-2 flex items-center justify-center">
+                <i className="fas fa-wallet text-3xl"></i>
+              </div>
               <h3 className="text-lg font-semibold text-white mb-2">{t('step1')}</h3>
               <p className="text-gray-400 text-sm">{t('step1')}</p>
             </div>
             <div className="bg-gray-800/30 p-6 rounded-xl border border-gray-700/50">
-              <div className="text-2xl font-bold text-purple-400 mb-2">2</div>
+              <div className="text-2xl font-bold text-purple-400 mb-2 flex items-center justify-center">
+                <PlusIcon className="w-8 h-8" />
+              </div>
               <h3 className="text-lg font-semibold text-white mb-2">{t('step2')}</h3>
               <p className="text-gray-400 text-sm">{t('step2')}</p>
             </div>
             <div className="bg-gray-800/30 p-6 rounded-xl border border-gray-700/50">
-              <div className="text-2xl font-bold text-green-400 mb-2">3</div>
+              <div className="text-2xl font-bold text-green-400 mb-2 flex items-center justify-center">
+                <QrCodeIcon className="w-8 h-8" />
+              </div>
               <h3 className="text-lg font-semibold text-white mb-2">{t('step3')}</h3>
               <p className="text-gray-400 text-sm">{t('step3')}</p>
             </div>
             <div className="bg-gray-800/30 p-6 rounded-xl border border-gray-700/50">
-              <div className="text-2xl font-bold text-yellow-400 mb-2">4</div>
+              <div className="text-2xl font-bold text-yellow-400 mb-2 flex items-center justify-center">
+                <CameraIcon className="w-8 h-8" />
+              </div>
               <h3 className="text-lg font-semibold text-white mb-2">{t('step4')}</h3>
               <p className="text-gray-400 text-sm">{t('step4')}</p>
             </div>
@@ -380,6 +376,9 @@ const LandingPage = () => {
         <FAQ />
       </div>
 
+      {/* 3D Box Section */}
+      <ThreeDBoxSection />
+
       {/* Додаємо компонент Community */}
       <Community />
     </div>
@@ -387,25 +386,352 @@ const LandingPage = () => {
 };
 
 const AboutPage = () => {
+  const { t } = useTranslation();
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 to-gray-800 pt-20">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
-        <h1 className="text-4xl font-bold text-white mb-8">Про нас</h1>
-        <div className="bg-gray-800/50 p-8 rounded-xl">
-          <p className="text-gray-300 mb-6">
-            Smart Product Passport - це інноваційне рішення для створення та управління цифровими паспортами продуктів.
-            Наша платформа використовує блокчейн Solana для забезпечення безпеки та прозорості даних.
-          </p>
-          <p className="text-gray-300 mb-6">
-            Ми надаємо інструменти для виробників, дилерів та кінцевих користувачів, дозволяючи їм
-            створювати, перевіряти та керувати цифровими паспортами продуктів.
-          </p>
-          <p className="text-gray-300">
-            Наша місія - зробити процес відстеження та перевірки продуктів більш ефективним та безпечним.
-          </p>
-        </div>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8 }}
+        >
+          <h1 className="text-4xl font-bold text-white mb-8 text-center flex items-center justify-center gap-3">
+            <HeartIcon className="w-8 h-8 text-blue-400" />
+            {t('about_us')}
+          </h1>
+
+          <div className="bg-gray-800/50 p-8 rounded-xl border border-gray-700/50">
+            <div className="space-y-8">
+              <div>
+                <h2 className="text-2xl font-semibold text-white mb-4 flex items-center gap-3">
+                  <CircleStackIcon className="w-5 h-5 text-blue-400" />
+                  {t('about_mission_title', 'Наша Місія')}
+                </h2>
+                <p className="text-gray-300 leading-relaxed flex items-start gap-3">
+                  <LightBulbIcon className="w-4 h-4 text-gray-500 mt-1" />
+                  {t('about_us_text1')}
+                </p>
+              </div>
+
+              <div>
+                <h2 className="text-2xl font-semibold text-white mb-4 flex items-center gap-3">
+                  <GiftIcon className="w-5 h-5 text-blue-400" />
+                  {t('about_offerings_title', 'Що ми пропонуємо')}
+                </h2>
+                <p className="text-gray-300 leading-relaxed mb-4 flex items-start gap-3">
+                  <CheckCircleIcon className="w-4 h-4 text-gray-500 mt-1" />
+                  {t('about_offerings_desc', 'Ми надаємо комплексні інструменти для всіх учасників ринку:')}
+                </p>
+                <ul className="text-gray-300 space-y-3 ml-6">
+                  <li className="flex items-center gap-3">
+                    <BuildingOfficeIcon className="w-4 h-4 text-blue-400" />
+                    <div>
+                      <strong>{t('about_manufacturers', 'Виробникам:')}</strong>
+                      <span className="ml-2">{t('about_manufacturers_desc', 'створення та управління цифровими паспортами продуктів')}</span>
+                    </div>
+                  </li>
+                  <li className="flex items-center gap-3">
+                    <ShoppingBagIcon className="w-4 h-4 text-blue-400" />
+                    <div>
+                      <strong>{t('about_dealers', 'Дилерам:')}</strong>
+                      <span className="ml-2">{t('about_dealers_desc', 'перевірка автентичності та відстеження продуктів')}</span>
+                    </div>
+                  </li>
+                  <li className="flex items-center gap-3">
+                    <UsersIcon className="w-4 h-4 text-blue-400" />
+                    <div>
+                      <strong>{t('about_consumers', 'Споживачам:')}</strong>
+                      <span className="ml-2">{t('about_consumers_desc', 'миттєва перевірка справжності продуктів через QR-коди')}</span>
+                    </div>
+                  </li>
+                </ul>
+              </div>
+
+              <div>
+                <h2 className="text-2xl font-semibold text-white mb-4 flex items-center gap-3">
+                  <StarIcon className="w-5 h-5 text-blue-400" />
+                  {t('about_benefits_title', 'Ключові переваги')}
+                </h2>
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div className="bg-gray-700/30 p-4 rounded-lg border border-gray-600/30">
+                    <h3 className="text-lg font-semibold text-white mb-2 flex items-center gap-2">
+                      <ShieldCheckIcon className="w-4 h-4 text-blue-400" />
+                      {t('secure_storage')}
+                    </h3>
+                    <p className="text-gray-300 text-sm flex items-start gap-2">
+                      <LockClosedIcon className="w-4 h-4 text-gray-500 mt-0.5" />
+                      {t('secure_storage_desc')}
+                    </p>
+                  </div>
+                  <div className="bg-gray-700/30 p-4 rounded-lg border border-gray-600/30">
+                    <h3 className="text-lg font-semibold text-white mb-2 flex items-center gap-2">
+                      <DevicePhoneMobileIcon className="w-4 h-4 text-blue-400" />
+                      {t('about_convenience', 'Зручність')}
+                    </h3>
+                    <p className="text-gray-300 text-sm flex items-start gap-2">
+                      <DevicePhoneMobileIcon className="w-4 h-4 text-gray-500 mt-0.5" />
+                      {t('about_convenience_desc', 'Швидкий доступ через QR-коди та мобільні пристрої')}
+                    </p>
+                  </div>
+                  <div className="bg-gray-700/30 p-4 rounded-lg border border-gray-600/30">
+                    <h3 className="text-lg font-semibold text-white mb-2 flex items-center gap-2">
+                      <EyeIcon className="w-4 h-4 text-blue-400" />
+                      {t('about_transparency', 'Прозорість')}
+                    </h3>
+                    <p className="text-gray-300 text-sm flex items-start gap-2">
+                      <MagnifyingGlassIcon className="w-4 h-4 text-gray-500 mt-0.5" />
+                      {t('about_transparency_desc', 'Повна історія продукту доступна кожному користувачу')}
+                    </p>
+                  </div>
+                  <div className="bg-gray-700/30 p-4 rounded-lg border border-gray-600/30">
+                    <h3 className="text-lg font-semibold text-white mb-2 flex items-center gap-2">
+                      <BoltIcon className="w-4 h-4 text-blue-400" />
+                      {t('about_speed', 'Швидкість')}
+                    </h3>
+                    <p className="text-gray-300 text-sm flex items-start gap-2">
+                      <ClockIcon className="w-4 h-4 text-gray-500 mt-0.5" />
+                      {t('about_speed_desc', 'Миттєва верифікація автентичності продуктів')}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <h2 className="text-2xl font-semibold text-white mb-4 flex items-center gap-3">
+                  <FlagIcon className="w-5 h-5 text-blue-400" />
+                  {t('about_goal_title', 'Наша мета')}
+                </h2>
+                <p className="text-gray-300 leading-relaxed flex items-start gap-3">
+                  <ArrowRightIcon className="w-4 h-4 text-gray-500 mt-1" />
+                  {t('about_us_text3')}
+                </p>
+              </div>
+
+              <div className="bg-blue-500/10 border border-blue-500/20 p-6 rounded-lg">
+                <h3 className="text-lg font-semibold text-white mb-2 flex items-center gap-2">
+                  <RocketLaunchIcon className="w-4 h-4 text-blue-400" />
+                  {t('about_future_title', 'Технології майбутнього')}
+                </h3>
+                <p className="text-gray-300 text-sm flex items-start gap-3">
+                  <CogIcon className="w-4 h-4 text-gray-500 mt-0.5" />
+                  {t('about_future_desc', 'Використовуючи найновіші технології блокчейну, ми створюємо екосистему, де кожен продукт має свій унікальний цифровий паспорт, що гарантує його автентичність та надає повну інформацію про його історію.')}
+                </p>
+              </div>
+
+              <div className="bg-gradient-to-r from-blue-500/10 to-purple-500/10 border border-blue-500/20 p-6 rounded-lg">
+                <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                  <HandThumbUpIcon className="w-5 h-5 text-blue-400" />
+                  {t('about_join_title', 'Приєднуйтесь до нас')}
+                </h3>
+                <p className="text-gray-300 text-sm flex items-start gap-3">
+                  <UsersIcon className="w-4 h-4 text-gray-500 mt-0.5" />
+                  {t('about_join_desc', 'Станьте частиною революції в сфері цифрових паспортів продуктів. Разом ми створюємо безпечніше та прозоріше майбутнє для всіх учасників ринку.')}
+                </p>
+                <div className="mt-4 flex items-center gap-4">
+                  <div className="flex items-center gap-2 text-gray-400">
+                    <CheckCircleIcon className="w-4 h-4 text-green-400" />
+                    <span className="text-sm">{t('about_trust', 'Довіра')}</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-gray-400">
+                    <CheckCircleIcon className="w-4 h-4 text-green-400" />
+                    <span className="text-sm">{t('about_security', 'Безпека')}</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-gray-400">
+                    <CheckCircleIcon className="w-4 h-4 text-green-400" />
+                    <span className="text-sm">{t('about_innovation', 'Інновації')}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </motion.div>
       </div>
     </div>
+  );
+};
+
+const ComicsSection = () => {
+  const { t } = useTranslation();
+  const [selectedComic, setSelectedComic] = useState(null);
+
+  const comics = [
+    {
+      id: 1,
+      title: t('comic_1_title'),
+      image: "/src/assets/comics/Протокол Розумних Паспортів Продуктів.png",
+      description: t('comic_1_desc'),
+      fullStory: t('comic_1_fullStory'),
+      technology: t('comic_1_technology')
+    },
+    {
+      id: 2,
+      title: t('comic_2_title'),
+      image: "/src/assets/comics/Хакатон Solana Breakpoint_ Революція блокчейну.png",
+      description: t('comic_2_desc'),
+      fullStory: t('comic_2_fullStory'),
+      technology: t('comic_2_technology')
+    },
+    {
+      id: 3,
+      title: t('comic_3_title'),
+      image: "/src/assets/comics/Майбутнє NFT та СМАРТ-Паспортів.png",
+      description: t('comic_3_desc'),
+      fullStory: t('comic_3_fullStory'),
+      technology: t('comic_3_technology')
+    },
+    {
+      id: 4,
+      title: t('comic_4_title'),
+      image: "/src/assets/comics/Оновлення через Smart Product Passport.png",
+      description: t('comic_4_desc'),
+      fullStory: t('comic_4_fullStory'),
+      technology: t('comic_4_technology')
+    },
+    {
+      id: 5,
+      title: t('comic_5_title'),
+      image: "/src/assets/comics/Скайдайвінг над футуристичним містом.png",
+      description: t('comic_5_desc'),
+      fullStory: t('comic_5_fullStory'),
+      technology: t('comic_5_technology')
+    },
+    {
+      id: 6,
+      title: t('comic_6_title'),
+      image: "/src/assets/comics/Оновлення драйверів з легкістю.png",
+      description: t('comic_6_desc'),
+      fullStory: t('comic_6_fullStory'),
+      technology: t('comic_6_technology')
+    }
+  ];
+
+  return (
+    <section className="py-16 bg-gradient-to-b from-gray-900 to-gray-800">
+      <div className="container mx-auto px-4">
+        {/* Заголовок секції */}
+        <div className="text-center mb-12">
+          <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">
+            {t('comics_title').split(' ').map((word, index) =>
+              index === 1 ? <span key={index} className="text-primary"> {word}</span> : word
+            )}
+          </h2>
+          <p className="text-xl text-gray-300 max-w-3xl mx-auto">
+            {t('comics_subtitle')}
+          </p>
+        </div>
+
+        {/* Сітка коміксів */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {comics.map((comic) => (
+            <div
+              key={comic.id}
+              className="group relative overflow-hidden rounded-2xl bg-gray-800/50 border border-gray-700/50 hover:border-primary/50 transition-all duration-300 hover:scale-105 hover:shadow-2xl hover:shadow-primary/20 cursor-pointer"
+              onClick={() => setSelectedComic(comic)}
+            >
+              {/* Зображення коміксу */}
+              <div className="relative overflow-hidden aspect-[4/3]">
+                <img
+                  src={comic.image}
+                  alt={comic.title}
+                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                />
+                {/* Градієнтний оверлей */}
+                <div className="absolute inset-0 bg-gradient-to-t from-gray-900/80 via-gray-900/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+              </div>
+
+              {/* Контент коміксу */}
+              <div className="p-6">
+                <h3 className="text-xl font-bold text-white mb-3 group-hover:text-primary transition-colors duration-300">
+                  {comic.title}
+                </h3>
+                <p className="text-gray-300 text-sm leading-relaxed">
+                  {comic.description}
+                </p>
+
+                {/* Кнопка "Читати більше" */}
+                <div className="mt-4 inline-flex items-center text-primary hover:text-primary/80 font-semibold text-sm transition-colors duration-300 group-hover:translate-x-1">
+                  {t('comics_read_more')}
+                  <svg className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                </div>
+              </div>
+
+              {/* Індикатор завантаження */}
+              <div className="absolute top-4 right-4 bg-primary/90 text-white text-xs px-2 py-1 rounded-full font-medium">
+                #{comic.id}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Модальне вікно для детального перегляду коміксу */}
+        {selectedComic && (
+          <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
+            <div className="bg-gray-900 rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+              <div className="p-8">
+                {/* Заголовок та кнопка закриття */}
+                <div className="flex justify-between items-start mb-6">
+                  <h2 className="text-3xl font-bold text-white">{selectedComic.title}</h2>
+                  <button
+                    onClick={() => setSelectedComic(null)}
+                    className="text-gray-400 hover:text-white transition-colors"
+                  >
+                    <XMarkIcon className="w-8 h-8" />
+                  </button>
+                </div>
+
+                {/* Зображення коміксу */}
+                <div className="mb-6">
+                  <img
+                    src={selectedComic.image}
+                    alt={selectedComic.title}
+                    className="w-full rounded-xl shadow-2xl"
+                  />
+                </div>
+
+                {/* Повна історія */}
+                <div className="mb-6">
+                  <h3 className="text-xl font-semibold text-white mb-3">{t('full_story')}</h3>
+                  <p className="text-gray-300 leading-relaxed">
+                    {selectedComic.fullStory}
+                  </p>
+                </div>
+
+                {/* Технологічні деталі */}
+                <div className="mb-6">
+                  <h3 className="text-xl font-semibold text-white mb-3">{t('technology_details')}</h3>
+                  <p className="text-gray-300 leading-relaxed">
+                    {selectedComic.technology}
+                  </p>
+                </div>
+
+                {/* Кнопка закриття */}
+                <div className="text-center">
+                  <button
+                    onClick={() => setSelectedComic(null)}
+                    className="bg-primary hover:bg-primary/90 text-white px-6 py-3 rounded-xl font-semibold transition-all duration-300 hover:scale-105"
+                  >
+                    {t('close')}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Кнопка "Побачити всі комікси" - прихована оскільки не функціональна */}
+        {/* <div className="text-center mt-12">
+          <button className="inline-flex items-center px-8 py-4 bg-primary hover:bg-primary/90 text-white font-semibold rounded-xl transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-primary/25">
+            <span>{t('comics_view_all')}</span>
+            <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+            </svg>
+          </button>
+        </div> */}
+      </div>
+    </section>
   );
 };
 
@@ -413,15 +739,32 @@ const Footer = () => {
   const { t } = useTranslation();
   return (
     <footer className="w-full bg-gray-900 text-gray-400 py-6 border-t border-gray-800 text-center flex flex-col items-center gap-2 shadow-lg" style={{ boxShadow: '0 -2px 16px 0 rgba(16,16,32,0.25)' }}>
+      {/* Логотип проекту */}
+      <div className="flex items-center justify-center mb-2">
+        <img
+          src="/src/assets/SPP_logo_white.png"
+          alt="Smart Product Passport"
+          className="h-8 mr-2"
+        />
+        <span className="text-white font-semibold text-lg">Smart Product Passport</span>
+      </div>
       <span className="text-sm">{t('footer_text')}</span>
-      <div className="flex gap-4 justify-center mt-2">
+      <div className="flex gap-4 justify-center items-center mt-2">
         <a
           href="https://x.com/SmartProductID"
           target="_blank"
           rel="noopener noreferrer"
-          className="text-blue-400 hover:text-blue-300 transition-colors text-xl"
+          className="text-blue-400 hover:text-blue-300 transition-colors text-xl flex items-center justify-center"
         >
-          <FaTwitter />
+          <i className="fab fa-twitter"></i>
+        </a>
+        <a
+          href="https://discord.gg/UGKBgREr"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="hover:opacity-80 transition-opacity flex items-center justify-center"
+        >
+          <img src="https://svgl.app/library/discord.svg" alt="Discord" className="w-5 h-5" />
         </a>
       </div>
     </footer>
@@ -431,7 +774,11 @@ const Footer = () => {
 const App = () => {
   const { t } = useTranslation();
   const [walletAddress, setWalletAddress] = useState(null);
-  const [role, setRole] = useState(null);
+  const [role, setRole] = useState(() => {
+    // Відновлюємо роль з localStorage при ініціалізації
+    const savedRole = localStorage.getItem('userRole');
+    return savedRole || null;
+  });
   const [formData, setFormData] = useState({
     serialNumber: '',
     productionDate: '',
@@ -460,7 +807,18 @@ const App = () => {
       try {
         if (window.solana && window.solana.isPhantom) {
           const response = await window.solana.connect({ onlyIfTrusted: true });
-          setWalletAddress(response.publicKey.toString());
+          const publicKey = response.publicKey.toString();
+          setWalletAddress(publicKey);
+
+          // Відновлюємо роль при підключенні гаманця
+          const savedRole = localStorage.getItem('userRole');
+          if (savedRole) {
+            setRole(savedRole);
+          } else {
+            // Якщо роль не збережена, визначаємо її
+            await determineUserRole(publicKey);
+          }
+
           await fetchPassports();
         }
       } catch (error) {
@@ -473,67 +831,9 @@ const App = () => {
     checkWallet();
   }, []);
 
-  const initializeManufacturerList = async () => {
+  // Виносимо логіку визначення ролі в окрему функцію
+  const determineUserRole = async (publicKey) => {
     try {
-      if (!walletAddress) {
-        setStatus('Please connect your wallet first');
-        return;
-      }
-
-      if (role !== 'admin') {
-        setStatus('Only admin can initialize manufacturer list');
-        return;
-      }
-
-      const program = await initializeProgram();
-      if (!program) {
-        throw new Error('Failed to initialize program');
-      }
-
-      const [manufacturerListPda] = PublicKey.findProgramAddressSync([
-        Buffer.from('manufacturer_list')
-      ], PROGRAM_ID);
-
-      // Перевіряємо чи акаунт вже ініціалізований
-      try {
-        await program.account.manufacturerList.fetch(manufacturerListPda);
-        console.log('Manufacturer list already initialized');
-        return;
-      } catch (err) {
-        if (!err.message.includes('Account does not exist')) {
-          throw err;
-        }
-      }
-
-      const tx = await program.methods
-        .initialize()
-        .accounts({
-          manufacturerList: manufacturerListPda,
-          admin: new PublicKey(walletAddress),
-          systemProgram: SystemProgram.programId,
-        })
-        .rpc();
-
-      console.log('Initialize transaction:', tx);
-      setStatus('Manufacturer list initialized successfully!');
-    } catch (error) {
-      console.error('Error initializing manufacturer list:', error);
-      setStatus(`Error initializing manufacturer list: ${error.message}`);
-    }
-  };
-
-  const connectWallet = async () => {
-    try {
-      const { solana } = window;
-      if (!solana || !solana.isPhantom) {
-        setStatus('Please install Phantom wallet.');
-        return;
-      }
-      const response = await solana.connect();
-      const publicKey = response.publicKey.toString();
-      setWalletAddress(publicKey);
-      console.log('Connected wallet:', publicKey);
-
       const program = await initializeProgram();
       if (!program) return;
 
@@ -554,18 +854,41 @@ const App = () => {
       console.log('Manufacturers:', manufacturers);
       console.log('Admin key:', ADMIN_PUBLIC_KEY.toString());
 
+      let newRole;
       if (publicKey === ADMIN_PUBLIC_KEY.toString()) {
         console.log('Setting role: admin');
-        setRole('admin');
+        newRole = 'admin';
         // Автоматично ініціалізуємо список виробників, якщо адмін підключився
         await initializeManufacturerList();
       } else if (manufacturers.includes(publicKey)) {
         console.log('Setting role: manufacturer');
-        setRole('manufacturer');
+        newRole = 'manufacturer';
       } else {
         console.log('Setting role: user');
-        setRole('user');
+        newRole = 'user';
       }
+
+      setRole(newRole);
+      localStorage.setItem('userRole', newRole);
+    } catch (error) {
+      console.error('Error determining user role:', error);
+    }
+  };
+
+  const connectWallet = async () => {
+    try {
+      const { solana } = window;
+      if (!solana || !solana.isPhantom) {
+        setStatus('Please install Phantom wallet.');
+        return;
+      }
+      const response = await solana.connect();
+      const publicKey = response.publicKey.toString();
+      setWalletAddress(publicKey);
+      console.log('Connected wallet:', publicKey);
+
+      // Визначаємо роль користувача
+      await determineUserRole(publicKey);
 
       setStatus('Wallet connected!');
       await fetchPassports();
@@ -594,44 +917,54 @@ const App = () => {
     setIsProcessing(true);
     try {
       if (!walletAddress) {
-        setStatus('Please connect your wallet first');
-        return;
+        console.error('Wallet not connected');
+        throw new Error('Please connect your wallet first');
       }
 
+      console.log('Initializing program...');
       const program = await initializeProgram();
       if (!program) {
+        console.error('Program initialization failed');
         throw new Error('Failed to initialize program. Please check if the program is deployed.');
       }
 
       // Перевіряємо чи програма розгорнута
+      console.log('Checking if program is deployed...');
       const programInfo = await connection.getAccountInfo(PROGRAM_ID);
       if (!programInfo) {
+        console.error('Program not found on chain');
         throw new Error('Program not found on chain. Please make sure the program is deployed to devnet.');
       }
 
       // Перевіряємо чи користувач має права на створення паспорта
+      console.log('Checking user role:', role);
       if (role !== 'manufacturer' && role !== 'admin') {
+        console.error('User role not authorized:', role);
         throw new Error('Only manufacturers and admins can create passports');
       }
 
+      console.log('Finding PDA for passport...');
       const [passportPda] = PublicKey.findProgramAddressSync([
         Buffer.from('passport'),
         Buffer.from(formData.serialNumber),
       ], PROGRAM_ID);
 
       // Перевіряємо чи паспорт вже існує
+      console.log('Checking if passport already exists...');
       try {
         const existingPassport = await program.account.passport.fetch(passportPda);
         if (existingPassport) {
+          console.error('Passport already exists:', existingPassport);
           throw new Error('Passport with this serial number already exists');
         }
       } catch (err) {
-        // Якщо помилка не про відсутність акаунта, прокидаємо її далі
         if (!err.message.includes('Account does not exist')) {
+          console.error('Error checking existing passport:', err);
           throw err;
         }
       }
 
+      console.log('Creating passport transaction...');
       const tx = await program.methods
         .createPassport(
           formData.serialNumber,
@@ -652,7 +985,7 @@ const App = () => {
 
       console.log('Transaction signature:', tx);
       setStatus('Passport created successfully!');
-      
+
       // Очищаємо форму
       setFormData({
         serialNumber: '',
@@ -673,14 +1006,15 @@ const App = () => {
     } catch (error) {
       console.error('Error creating passport:', error);
       let errorMessage = error.message;
-      
+
       // Додаткова обробка помилок Anchor
       if (error.logs) {
         console.error('Program logs:', error.logs);
         errorMessage += `\nProgram logs: ${error.logs.join('\n')}`;
       }
-      
+
       setStatus(`Error creating passport: ${errorMessage}`);
+      throw error; // Прокидаємо помилку далі для обробки в компоненті
     } finally {
       setIsProcessing(false);
     }
@@ -764,21 +1098,21 @@ const App = () => {
           {
             name: 'initialize',
             accounts: [
-              { 
-                name: 'manufacturerList', 
-                isMut: true, 
+              {
+                name: 'manufacturerList',
+                isMut: true,
                 isSigner: false,
                 docs: 'The manufacturer list account'
               },
-              { 
-                name: 'admin', 
-                isMut: true, 
+              {
+                name: 'admin',
+                isMut: true,
                 isSigner: true,
                 docs: 'The admin account'
               },
-              { 
-                name: 'systemProgram', 
-                isMut: false, 
+              {
+                name: 'systemProgram',
+                isMut: false,
                 isSigner: false,
                 docs: 'The system program'
               }
@@ -788,27 +1122,27 @@ const App = () => {
           {
             name: 'addManufacturer',
             accounts: [
-              { 
-                name: 'manufacturerList', 
-                isMut: true, 
+              {
+                name: 'manufacturerList',
+                isMut: true,
                 isSigner: false,
                 docs: 'The manufacturer list account'
               },
-              { 
-                name: 'admin', 
-                isMut: false, 
+              {
+                name: 'admin',
+                isMut: false,
                 isSigner: true,
                 docs: 'The admin account'
               }
             ],
             args: [
-              { 
-                name: 'manufacturer', 
+              {
+                name: 'manufacturer',
                 type: 'publicKey',
                 docs: 'The manufacturer public key'
               },
-              { 
-                name: 'name', 
+              {
+                name: 'name',
                 type: 'string',
                 docs: 'The manufacturer name'
               }
@@ -817,63 +1151,63 @@ const App = () => {
           {
             name: 'createPassport',
             accounts: [
-              { 
-                name: 'passport', 
-                isMut: true, 
+              {
+                name: 'passport',
+                isMut: true,
                 isSigner: false,
                 docs: 'The passport account'
               },
-              { 
-                name: 'manufacturer', 
-                isMut: true, 
+              {
+                name: 'manufacturer',
+                isMut: true,
                 isSigner: true,
                 docs: 'The manufacturer account'
               },
-              { 
-                name: 'systemProgram', 
-                isMut: false, 
+              {
+                name: 'systemProgram',
+                isMut: false,
                 isSigner: false,
                 docs: 'The system program'
               }
             ],
             args: [
-              { 
-                name: 'serialNumber', 
+              {
+                name: 'serialNumber',
                 type: 'string',
                 docs: 'The passport serial number'
               },
-              { 
-                name: 'productionDate', 
+              {
+                name: 'productionDate',
                 type: 'string',
                 docs: 'The production date'
               },
-              { 
-                name: 'deviceModel', 
+              {
+                name: 'deviceModel',
                 type: 'string',
                 docs: 'The device model'
               },
-              { 
-                name: 'warrantyPeriod', 
+              {
+                name: 'warrantyPeriod',
                 type: 'string',
                 docs: 'The warranty period'
               },
-              { 
-                name: 'countryOfOrigin', 
+              {
+                name: 'countryOfOrigin',
                 type: 'string',
                 docs: 'The country of origin'
               },
-              { 
-                name: 'manufacturerId', 
+              {
+                name: 'manufacturerId',
                 type: 'string',
                 docs: 'The manufacturer ID'
               },
-              { 
-                name: 'ipfsCid', 
+              {
+                name: 'ipfsCid',
                 type: 'string',
                 docs: 'The IPFS CID'
               },
-              { 
-                name: 'owner', 
+              {
+                name: 'owner',
                 type: 'publicKey',
                 docs: 'The owner account'
               }
@@ -887,26 +1221,26 @@ const App = () => {
             type: {
               kind: 'struct',
               fields: [
-                { 
-                  name: 'manufacturers', 
+                {
+                  name: 'manufacturers',
                   docs: 'The list of manufacturers',
-                  type: { 
+                  type: {
                     vec: {
                       kind: 'struct',
                       fields: [
-                        { 
-                          name: 'name', 
+                        {
+                          name: 'name',
                           docs: 'The manufacturer name',
-                          type: 'string' 
+                          type: 'string'
                         },
-                        { 
-                          name: 'pubkey', 
+                        {
+                          name: 'pubkey',
                           docs: 'The manufacturer public key',
-                          type: 'publicKey' 
+                          type: 'publicKey'
                         }
                       ]
                     }
-                  } 
+                  }
                 }
               ]
             }
@@ -917,45 +1251,45 @@ const App = () => {
             type: {
               kind: 'struct',
               fields: [
-                { 
-                  name: 'serialNumber', 
+                {
+                  name: 'serialNumber',
                   docs: 'The passport serial number',
-                  type: 'string' 
+                  type: 'string'
                 },
-                { 
-                  name: 'productionDate', 
+                {
+                  name: 'productionDate',
                   docs: 'The production date',
-                  type: 'string' 
+                  type: 'string'
                 },
-                { 
-                  name: 'deviceModel', 
+                {
+                  name: 'deviceModel',
                   docs: 'The device model',
-                  type: 'string' 
+                  type: 'string'
                 },
-                { 
-                  name: 'warrantyPeriod', 
+                {
+                  name: 'warrantyPeriod',
                   docs: 'The warranty period',
-                  type: 'string' 
+                  type: 'string'
                 },
-                { 
-                  name: 'countryOfOrigin', 
+                {
+                  name: 'countryOfOrigin',
                   docs: 'The country of origin',
-                  type: 'string' 
+                  type: 'string'
                 },
-                { 
-                  name: 'manufacturerId', 
+                {
+                  name: 'manufacturerId',
                   docs: 'The manufacturer ID',
-                  type: 'string' 
+                  type: 'string'
                 },
-                { 
-                  name: 'ipfsCid', 
+                {
+                  name: 'ipfsCid',
                   docs: 'The IPFS CID',
-                  type: 'string' 
+                  type: 'string'
                 },
-                { 
-                  name: 'owner', 
+                {
+                  name: 'owner',
                   docs: 'The owner account',
-                  type: 'publicKey' 
+                  type: 'publicKey'
                 }
               ]
             }
@@ -985,6 +1319,7 @@ const App = () => {
         await window.solana.disconnect();
         setWalletAddress(null);
         setRole(null);
+        localStorage.removeItem('userRole'); // Видаляємо роль при відключенні
         setPassports([]);
         setStatus('Wallet disconnected');
       }
@@ -1039,7 +1374,7 @@ const App = () => {
 
       console.log('Add manufacturer transaction:', tx);
       setStatus('Manufacturer added successfully!');
-      
+
       // Оновлюємо список виробників
       const manufacturerList = await program.account.manufacturerList.fetch(manufacturerListPda);
       console.log('Updated manufacturer list:', manufacturerList);
@@ -1060,9 +1395,9 @@ const App = () => {
   return (
     <Router>
       <div className="min-h-screen flex flex-col bg-gradient-to-br from-gray-900 to-gray-800">
-        <Navigation 
-          walletAddress={walletAddress} 
-          role={role} 
+        <Navigation
+          walletAddress={walletAddress}
+          role={role}
           connectWallet={connectWallet}
           disconnectWallet={disconnectWallet}
           addManufacturer={addManufacturer}
@@ -1071,8 +1406,8 @@ const App = () => {
           <Routes>
             <Route path="/" element={<LandingPage />} />
             <Route path="/about" element={<AboutPage />} />
-            <Route 
-              path="/create-nft" 
+            <Route
+              path="/create-nft"
               element={
                 walletAddress ? (
                   <CreateNFTPage
@@ -1087,10 +1422,10 @@ const App = () => {
                 ) : (
                   <Navigate to="/" />
                 )
-              } 
+              }
             />
-            <Route 
-              path="/passports" 
+            <Route
+              path="/passports"
               element={
                 walletAddress ? (
                   <PassportsPage
@@ -1107,20 +1442,21 @@ const App = () => {
                 ) : (
                   <Navigate to="/" />
                 )
-              } 
+              }
             />
-            <Route 
-              path="/scan" 
+            <Route
+              path="/scan"
               element={
                 walletAddress ? (
                   <ScanPage handleQrScan={handleQrScan} />
                 ) : (
                   <Navigate to="/" />
                 )
-              } 
+              }
             />
           </Routes>
         </div>
+        <ComicsSection />
         <Footer />
         {status && (
           <div className="fixed bottom-4 right-4 bg-gray-800 text-white px-6 py-3 rounded-lg shadow-lg">

@@ -1,11 +1,11 @@
 import { useState, useEffect, useRef } from 'react';
-import { FaQrcode, FaSearch, FaCamera, FaFileAlt, FaCheck, FaTimes, FaExternalLinkAlt } from 'react-icons/fa';
-import { motion } from 'framer-motion';
 import { Html5QrcodeScanner } from 'html5-qrcode';
+import { motion } from 'framer-motion';
+import { MagnifyingGlassIcon, XMarkIcon, ArrowTopRightOnSquareIcon, CameraIcon } from '@heroicons/react/24/outline';
 
 const API_URL = 'http://localhost:3000/api'; // URL вашого бекенду
 
-const ScanPage = () => {
+const ScanPage = ({ handleQrScan }) => {
   const [manualInput, setManualInput] = useState('');
   const [isScanning, setIsScanning] = useState(false);
   const [nftData, setNftData] = useState(null);
@@ -79,6 +79,10 @@ const ScanPage = () => {
     }
   };
 
+  const stopScanning = () => {
+    setIsScanning(false);
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black pt-20">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -102,9 +106,10 @@ const ScanPage = () => {
               />
               <button
                 type="submit"
-                className="inline-flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+                className="inline-flex items-center gap-2 px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:bg-gray-500 disabled:cursor-not-allowed transition-colors"
               >
-                <FaSearch /> Search
+                <MagnifyingGlassIcon className="h-5 w-5" />
+                Сканувати
               </button>
             </form>
 
@@ -116,11 +121,11 @@ const ScanPage = () => {
               >
                 {isScanning ? (
                   <>
-                    <FaTimes /> Stop Scanning
+                    <XMarkIcon className="h-5 w-5" /> Stop Scanning
                   </>
                 ) : (
                   <>
-                    <FaCamera /> Start Scanning
+                    <CameraIcon className="h-5 w-5" /> Start Scanning
                   </>
                 )}
               </button>
@@ -187,12 +192,20 @@ const ScanPage = () => {
                       rel="noopener noreferrer"
                       className="inline-flex items-center gap-2 text-blue-400 hover:text-blue-300 transition-colors"
                     >
-                      View on Solana Explorer <FaExternalLinkAlt className="text-xs" />
+                      View on Solana Explorer <ArrowTopRightOnSquareIcon className="h-4 w-4 text-xs" />
                     </a>
                   </div>
                 </div>
               </motion.div>
             )}
+
+            <div className="text-center mb-8">
+              <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-500/10 rounded-full mb-4">
+                <CameraIcon className="h-6 w-6 text-blue-400" />
+              </div>
+              <h2 className="text-2xl font-bold text-white mb-2">Сканування QR-коду</h2>
+              <p className="text-gray-400">Наведіть камеру на QR-код продукту для перевірки автентичності</p>
+            </div>
           </div>
         </motion.div>
       </div>

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FaChevronDown } from 'react-icons/fa';
 import { useTranslation } from 'react-i18next';
+import { ChevronDownIcon } from '@heroicons/react/24/outline';
 
 const FAQItem = ({ question, answer, isOpen, onClick }) => {
   return (
@@ -17,7 +17,7 @@ const FAQItem = ({ question, answer, isOpen, onClick }) => {
           animate={{ rotate: isOpen ? 180 : 0 }}
           transition={{ duration: 0.2 }}
         >
-          <FaChevronDown className="text-gray-400" />
+          <ChevronDownIcon className="w-5 h-5 text-gray-400" />
         </motion.div>
       </button>
       <AnimatePresence>

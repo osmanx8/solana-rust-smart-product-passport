@@ -1,6 +1,12 @@
 import { useState } from 'react';
-import { FaPlus, FaSort, FaSortUp, FaSortDown, FaFileAlt, FaExternalLinkAlt } from 'react-icons/fa';
 import { motion, AnimatePresence } from 'framer-motion';
+import {
+  PlusIcon,
+  ChevronUpIcon,
+  ChevronDownIcon,
+  ArrowTopRightOnSquareIcon,
+} from "@heroicons/react/24/outline";
+import { Button } from "./ui/button";
 
 const PassportsPage = ({ 
   role, 
@@ -26,14 +32,13 @@ const PassportsPage = ({
           Паспорти продуктів
         </h1>
         {(role === 'manufacturer' || role === 'admin') && (
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
+          <Button
             onClick={() => setShowForm(!showForm)}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-blue-500 to-purple-500 text-white hover:shadow-lg hover:shadow-blue-500/25 transition-all"
+            className="mb-6 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg flex items-center gap-2 transition-all duration-300 hover:scale-105"
           >
-            <FaPlus /> Створити паспорт
-          </motion.button>
+            <PlusIcon className="w-5 h-5" />
+            Створити паспорт
+          </Button>
         )}
       </motion.div>
 
@@ -123,7 +128,6 @@ const PassportsPage = ({
                     onChange={handleFileChange}
                     className="w-full px-4 py-2 rounded-lg bg-gray-700/50 text-white border border-gray-600 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all"
                   />
-                  <FaFileAlt className="text-gray-400" />
                 </div>
               </div>
               <motion.button
@@ -151,26 +155,30 @@ const PassportsPage = ({
                 <th
                   scope="col"
                   className="px-6 py-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider cursor-pointer hover:bg-gray-700/50 transition-colors"
-                  onClick={() => handleSort('serialNumber')}
                 >
-                  <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => handleSort('serialNumber')}
+                    className="flex items-center gap-2 px-4 py-2 text-left hover:bg-gray-100 transition-colors"
+                  >
                     Серійний номер
                     {sortField === 'serialNumber' && (
-                      sortOrder === 'asc' ? <FaSortUp /> : <FaSortDown />
+                      sortOrder === 'asc' ? <ChevronUpIcon className="w-4 h-4" /> : <ChevronDownIcon className="w-4 h-4" />
                     )}
-                  </div>
+                  </button>
                 </th>
                 <th
                   scope="col"
                   className="px-6 py-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider cursor-pointer hover:bg-gray-700/50 transition-colors"
-                  onClick={() => handleSort('productionDate')}
                 >
-                  <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => handleSort('productionDate')}
+                    className="flex items-center gap-2 px-4 py-2 text-left hover:bg-gray-100 transition-colors"
+                  >
                     Дата виробництва
                     {sortField === 'productionDate' && (
-                      sortOrder === 'asc' ? <FaSortUp /> : <FaSortDown />
+                      sortOrder === 'asc' ? <ChevronUpIcon className="w-4 h-4" /> : <ChevronDownIcon className="w-4 h-4" />
                     )}
-                  </div>
+                  </button>
                 </th>
                 <th
                   scope="col"
@@ -224,14 +232,12 @@ const PassportsPage = ({
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
                     {passport.ipfsCid ? (
-                      <a
-                        href={`https://ipfs.io/ipfs/${passport.ipfsCid}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-2 text-blue-400 hover:text-blue-300 transition-colors"
+                      <button
+                        onClick={() => handleViewPassport(passport)}
+                        className="text-blue-400 hover:text-blue-300 transition-colors flex items-center gap-1"
                       >
-                        Переглянути <FaExternalLinkAlt className="text-xs" />
-                      </a>
+                        Переглянути <ArrowTopRightOnSquareIcon className="w-4 h-4" />
+                      </button>
                     ) : (
                       'Немає'
                     )}

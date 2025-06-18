@@ -33,18 +33,18 @@
 
 ---
 
-## About
+## Про нас
 
-**Smart Product Passport** is an innovative blockchain-based solution for product authentication and documentation. Built on the Solana blockchain, our platform provides a secure, transparent, and efficient way to create, manage, and verify digital product passports.
+**Smart Product Passport** — це інноваційне рішення на основі блокчейну для аутентифікації та документування продуктів. Побудована на блокчейні Solana, наша платформа забезпечує безпечний, прозорий та ефективний спосіб створення, управління та верифікації цифрових паспортів продуктів.
 
-### Key Features
+### Ключові особливості
 
-- 🔐 **Secure Blockchain Storage**: All product data is securely stored on the Solana blockchain
-- 📱 **QR Code Integration**: Easy product verification through QR codes
-- 🏭 **Manufacturer Management**: Dedicated system for manufacturers to create and manage product passports
-- 📄 **Documentation Support**: Upload and store product documentation (PDF, DOC, images)
-- 🔍 **Real-time Verification**: Instant product authenticity verification
-- 🌐 **Decentralized Architecture**: Leveraging Solana's high-performance blockchain
+- 🔐 **Безпечне зберігання в блокчейні**: Всі дані про продукт безпечно зберігаються в блокчейні Solana
+- 📱 **Інтеграція QR-кодів**: Легка верифікація продуктів через QR-коди
+- 🏭 **Управління виробниками**: Спеціалізована система для виробників для створення та управління паспортами продуктів
+- 📄 **Підтримка документації**: Завантаження та зберігання документації продукту (PDF, DOC, зображення)
+- 🔍 **Верифікація в реальному часі**: Миттєва верифікація автентичності продукту
+- 🌐 **Децентралізована архітектура**: Використання високопродуктивного блокчейну Solana
 
 ---
 
