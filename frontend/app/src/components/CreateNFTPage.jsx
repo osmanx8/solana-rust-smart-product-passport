@@ -4,7 +4,7 @@ import QRCode from 'qrcode.react';
 import { useTranslation } from 'react-i18next';
 import { ArrowUpTrayIcon } from '@heroicons/react/24/outline';
 
-const API_URL = 'http://localhost:3000/api';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
 const CreateNFTPage = ({
   handleInputChange,
