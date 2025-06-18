@@ -127,4 +127,6 @@ This project is developed as part of the hackathon organized by **Kumeka Team** 
   <p>Built with ❤️ for Soalana comunity by support of the Kumeka Team & Colloseum Hackathon</p>
 </div>
 
-<!-- Trigger redeploy --> 
+<!-- Trigger redeploy -->
+
+<!-- Force redeploy - Update deployment --> 
