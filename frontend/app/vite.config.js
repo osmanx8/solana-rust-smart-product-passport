@@ -7,5 +7,21 @@ export default defineConfig({
   define: {
     'process.env': {},
     global: 'globalThis'
+  },
+  build: {
+    outDir: 'dist',
+    sourcemap: false,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vendor: ['react', 'react-dom'],
+          ui: ['@heroicons/react', 'lucide-react']
+        }
+      }
+    }
+  },
+  server: {
+    port: 3000,
+    host: true
   }
 })
