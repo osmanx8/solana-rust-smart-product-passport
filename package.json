@@ -3,13 +3,10 @@
   "version": "1.0.0",
   "description": "Smart Product Passport Application",
   "private": true,
-  "workspaces": [
-    "frontend/app",
-    "backend"
-  ],
   "scripts": {
-    "dev": "cd frontend/app && npm run dev",
+    "postinstall": "cd frontend/app && npm ci",
     "build": "cd frontend/app && npm run build",
+    "dev": "cd frontend/app && npm run dev",
     "preview": "cd frontend/app && npm run preview"
   },
   "engines": {

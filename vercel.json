@@ -1,7 +1,7 @@
 {
-  "buildCommand": "cd frontend/app && npm ci && npm run build",
+  "buildCommand": "chmod +x build.sh && ./build.sh",
   "outputDirectory": "frontend/app/dist",
-  "installCommand": "cd frontend/app && npm ci",
+  "installCommand": "echo 'Installation handled by build script'",
   "framework": "vite",
   "rewrites": [
     {
