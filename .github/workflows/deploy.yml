@@ -24,7 +24,9 @@ jobs:
     - name: Install dependencies
       run: |
         cd frontend/app
-        npm ci
+        rm -rf dist
+        npm install
+        npm run build
         
     - name: Run tests
       run: |
