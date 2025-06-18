@@ -15,8 +15,8 @@ node_modules/
 frontend/app/node_modules/
 
 # Build outputs (will be generated)
-build/
-frontend/app/build/
+dist/
+frontend/app/dist/
 
 # Environment files
 .env*
