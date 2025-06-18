@@ -3,11 +3,6 @@
   "outputDirectory": "frontend/app/dist",
   "installCommand": "cd frontend/app && npm ci",
   "framework": "vite",
-  "functions": {
-    "frontend/app/dist/**/*.js": {
-      "runtime": "nodejs18.x"
-    }
-  },
   "rewrites": [
     {
       "source": "/(.*)",

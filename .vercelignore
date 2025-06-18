@@ -1,0 +1,31 @@
+# Backend files
+backend/
+programs/
+anchor/
+config/
+
+# Development files
+.vscode/
+.github/
+*.md
+!README.md
+
+# Node modules (will be installed during build)
+node_modules/
+frontend/app/node_modules/
+
+# Build outputs (will be generated)
+dist/
+frontend/app/dist/
+
+# Environment files
+.env*
+!.env.example
+
+# Logs
+*.log
+
+# IDE files
+.idea/
+*.swp
+*.swo 
