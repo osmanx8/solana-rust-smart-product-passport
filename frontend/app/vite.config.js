@@ -9,7 +9,7 @@ export default defineConfig({
     global: 'globalThis'
   },
   build: {
-    outDir: 'dist',
+    outDir: 'build',
     sourcemap: false,
     rollupOptions: {
       output: {
