@@ -24,19 +24,12 @@ jobs:
     - name: Install dependencies
       run: |
         cd frontend/app
-        rm -rf dist
         npm install
-        npm run build
         
     - name: Run tests
       run: |
         cd frontend/app
         npm run test
-        
-    - name: Build project
-      run: |
-        cd frontend/app
-        npm run build
         
     - name: Deploy to Vercel
       uses: amondnet/vercel-action@v25
