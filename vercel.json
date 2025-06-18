@@ -1,7 +1,7 @@
 {
-  "buildCommand": "chmod +x build.sh && ./build.sh",
+  "buildCommand": "npm run build",
   "outputDirectory": "frontend/app/dist",
-  "installCommand": "echo 'Installation handled by build script'",
+  "installCommand": "npm install",
   "framework": "vite",
   "rewrites": [
     {

@@ -28,8 +28,4 @@ frontend/app/dist/
 # IDE files
 .idea/
 *.swp
-*.swo
-
-# Keep build scripts
-!build.sh
-!build.bat 
+*.swo 

@@ -4,8 +4,7 @@
   "description": "Smart Product Passport Application",
   "private": true,
   "scripts": {
-    "postinstall": "cd frontend/app && npm ci",
-    "build": "cd frontend/app && npm run build",
+    "build": "cd frontend/app && npm ci && npm run build",
     "dev": "cd frontend/app && npm run dev",
     "preview": "cd frontend/app && npm run preview"
   },
