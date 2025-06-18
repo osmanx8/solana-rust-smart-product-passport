@@ -3,7 +3,7 @@ import { Html5QrcodeScanner } from 'html5-qrcode';
 import { motion } from 'framer-motion';
 import { MagnifyingGlassIcon, XMarkIcon, ArrowTopRightOnSquareIcon, CameraIcon } from '@heroicons/react/24/outline';
 
-const API_URL = 'http://localhost:3000/api'; // URL вашого бекенду
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
 const ScanPage = ({ handleQrScan }) => {
   const [manualInput, setManualInput] = useState('');
