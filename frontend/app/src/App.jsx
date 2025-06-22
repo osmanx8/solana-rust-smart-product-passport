@@ -559,7 +559,7 @@ const ComicsSection = () => {
     {
       id: 1,
       title: t('comic_1_title'),
-      image: "/assets/comics/spp_protocol.png",
+      image: "./assets/comics/spp_protocol.png",
       description: t('comic_1_desc'),
       fullStory: t('comic_1_fullStory'),
       technology: t('comic_1_technology')
@@ -567,7 +567,7 @@ const ComicsSection = () => {
     {
       id: 2,
       title: t('comic_2_title'),
-      image: "/assets/comics/solana_breakpoint.png",
+      image: "./assets/comics/solana_breakpoint.png",
       description: t('comic_2_desc'),
       fullStory: t('comic_2_fullStory'),
       technology: t('comic_2_technology')
@@ -575,7 +575,7 @@ const ComicsSection = () => {
     {
       id: 3,
       title: t('comic_3_title'),
-      image: "/assets/comics/future_nft_spp.png",
+      image: "./assets/comics/future_nft_spp.png",
       description: t('comic_3_desc'),
       fullStory: t('comic_3_fullStory'),
       technology: t('comic_3_technology')
@@ -583,7 +583,7 @@ const ComicsSection = () => {
     {
       id: 4,
       title: t('comic_4_title'),
-      image: "/assets/comics/updating_with_spp.png",
+      image: "./assets/comics/updating_with_spp.png",
       description: t('comic_4_desc'),
       fullStory: t('comic_4_fullStory'),
       technology: t('comic_4_technology')
@@ -591,7 +591,7 @@ const ComicsSection = () => {
     {
       id: 5,
       title: t('comic_5_title'),
-      image: "/assets/comics/skydiving.png",
+      image: "./assets/comics/skydiving.png",
       description: t('comic_5_desc'),
       fullStory: t('comic_5_fullStory'),
       technology: t('comic_5_technology')
@@ -599,7 +599,7 @@ const ComicsSection = () => {
     {
       id: 6,
       title: t('comic_6_title'),
-      image: "/assets/comics/update_drivers.png",
+      image: "./assets/comics/update_drivers.png",
       description: t('comic_6_desc'),
       fullStory: t('comic_6_fullStory'),
       technology: t('comic_6_technology')
@@ -742,7 +742,7 @@ const Footer = () => {
       {/* Логотип проекту */}
       <div className="flex items-center justify-center mb-2">
         <img
-          src="/src/assets/SPP_logo_white.png"
+          src="./assets/SPP_logo_white.png"
           alt="Smart Product Passport"
           className="h-8 mr-2"
         />
