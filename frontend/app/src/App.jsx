@@ -10,6 +10,13 @@ import { motion } from 'framer-motion';
 import LanguageSwitcher from './components/LanguageSwitcher';
 import { useTranslation } from 'react-i18next';
 import logo from './assets/SPP_logo.png';
+import sppProtocol from './assets/comics/spp_protocol.png';
+import solanaBreakpoint from './assets/comics/solana_breakpoint.png';
+import futureNftSpp from './assets/comics/future_nft_spp.png';
+import updatingWithSpp from './assets/comics/updating_with_spp.png';
+import skydiving from './assets/comics/skydiving.png';
+import updateDrivers from './assets/comics/update_drivers.png';
+import whiteLogo from './assets/SPP_logo_white.png';
 import { requestAirdrop } from './utils/airdrop';
 import FAQ from './components/FAQ';
 import Community from './components/Community';
@@ -559,50 +566,56 @@ const ComicsSection = () => {
     {
       id: 1,
       title: t('comic_1_title'),
-      image: "./assets/comics/spp_protocol.png",
+      image: sppProtocol,
       description: t('comic_1_desc'),
       fullStory: t('comic_1_fullStory'),
-      technology: t('comic_1_technology')
+      technology: t('comic_1_technology'),
+      link: "https://x.com/spprotocol/status/1759606829774393696"
     },
     {
       id: 2,
       title: t('comic_2_title'),
-      image: "./assets/comics/solana_breakpoint.png",
+      image: solanaBreakpoint,
       description: t('comic_2_desc'),
       fullStory: t('comic_2_fullStory'),
-      technology: t('comic_2_technology')
+      technology: t('comic_2_technology'),
+      link: "https://x.com/spprotocol/status/1715423851086037007"
     },
     {
       id: 3,
       title: t('comic_3_title'),
-      image: "./assets/comics/future_nft_spp.png",
+      image: futureNftSpp,
       description: t('comic_3_desc'),
       fullStory: t('comic_3_fullStory'),
-      technology: t('comic_3_technology')
+      technology: t('comic_3_technology'),
+      link: "https://x.com/spprotocol/status/1725579428594950338"
     },
     {
       id: 4,
       title: t('comic_4_title'),
-      image: "./assets/comics/updating_with_spp.png",
+      image: updatingWithSpp,
       description: t('comic_4_desc'),
       fullStory: t('comic_4_fullStory'),
-      technology: t('comic_4_technology')
+      technology: t('comic_4_technology'),
+      link: "https://x.com/spprotocol/status/1720836551601614902"
     },
     {
       id: 5,
       title: t('comic_5_title'),
-      image: "./assets/comics/skydiving.png",
+      image: skydiving,
       description: t('comic_5_desc'),
       fullStory: t('comic_5_fullStory'),
-      technology: t('comic_5_technology')
+      technology: t('comic_5_technology'),
+      link: "https://x.com/spprotocol/status/1722955959639535626"
     },
     {
       id: 6,
       title: t('comic_6_title'),
-      image: "./assets/comics/update_drivers.png",
+      image: updateDrivers,
       description: t('comic_6_desc'),
       fullStory: t('comic_6_fullStory'),
-      technology: t('comic_6_technology')
+      technology: t('comic_6_technology'),
+      link: "https://x.com/spprotocol/status/1757065942461944111"
     }
   ];
 
@@ -742,7 +755,7 @@ const Footer = () => {
       {/* Логотип проекту */}
       <div className="flex items-center justify-center mb-2">
         <img
-          src="./assets/SPP_logo_white.png"
+          src={whiteLogo}
           alt="Smart Product Passport"
           className="h-8 mr-2"
         />
