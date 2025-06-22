@@ -11,7 +11,7 @@ import LanguageSwitcher from './components/LanguageSwitcher';
 import { useTranslation } from 'react-i18next';
 import logo from './assets/SPP_logo.png';
 import sppProtocol from './assets/comics/spp_protocol.png';
-import solanaBreakpoint from './assets/comics/solana_breakpoint.png';
+import solanaBreakpoint from './assets/comics/soana_breakout_hackathon_application.png';
 import futureNftSpp from './assets/comics/future_nft_spp.png';
 import updatingWithSpp from './assets/comics/updating_with_spp.png';
 import skydiving from './assets/comics/skydiving.png';
