@@ -24,9 +24,10 @@ export function formatNftMetadata(formData) {
 }
 
 /**
- * Create Phantom wallet signer
+ * Create Phantom wallet signer (deprecated - use inline implementation in nftCreator.js)
  */
 export function createPhantomSigner(wallet) {
+  console.warn('createPhantomSigner is deprecated. Use inline implementation in nftCreator.js');
   return {
     publicKey: wallet.publicKey,
     signMessage: async (message) => {
