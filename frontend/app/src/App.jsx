@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Connection, PublicKey, Keypair, SystemProgram } from '@solana/web3.js';
-import { AnchorProvider, Program } from '@project-serum/anchor';
+import { Connection, PublicKey, Keypair, SystemProgram, clusterApiUrl, Transaction, sendAndConfirmTransaction, LAMPORTS_PER_SOL } from '@solana/web3.js';
 import { BrowserRouter as Router, Routes, Route, Link, Navigate } from 'react-router-dom';
 import PassportsPage from './components/PassportsPage';
 import ScanPage from './components/ScanPage';
@@ -18,6 +17,7 @@ import skydiving from './assets/comics/skydiving.png';
 import updateDrivers from './assets/comics/drivers_updating_comic.png';
 import whiteLogo from './assets/SPP_logo_white.png';
 import { requestAirdrop } from './utils/airdrop';
+import { mintPassportWithMetaplex } from './utils/nftCreator';
 import FAQ from './components/FAQ';
 import Community from './components/Community';
 import ThreeDBoxSection from './components/ThreeDBoxSection';
@@ -784,6 +784,10 @@ const Footer = () => {
   );
 };
 
+const connection = new Connection(clusterApiUrl('devnet'));
+
+
+
 const App = () => {
   const { t } = useTranslation();
   const [walletAddress, setWalletAddress] = useState(null);
@@ -810,6 +814,7 @@ const App = () => {
   const [sortOrder, setSortOrder] = useState('asc');
   const [isLoading, setIsLoading] = useState(true);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [createdNftAddress, setCreatedNftAddress] = useState(null);
 
   const connection = new Connection('https://api.devnet.solana.com', 'confirmed');
   const PROGRAM_ID = new PublicKey(import.meta.env.VITE_PROGRAM_ID || '8tdpknetCPXv5Ztk8yoJWceRCgCxp3T6U56TnUGk99t4');
@@ -846,46 +851,11 @@ const App = () => {
 
   // Виносимо логіку визначення ролі в окрему функцію
   const determineUserRole = async (publicKey) => {
-    try {
-      const program = await initializeProgram();
-      if (!program) return;
-
-      const [manufacturerListPda] = PublicKey.findProgramAddressSync([
-        Buffer.from('manufacturer_list')
-      ], PROGRAM_ID);
-
-      let manufacturerList;
-      try {
-        manufacturerList = await program.account.manufacturerList.fetch(manufacturerListPda);
-        console.log('Manufacturer list:', manufacturerList);
-      } catch (err) {
-        console.log('Error fetching manufacturer list:', err);
-        manufacturerList = null;
-      }
-
-      const manufacturers = (manufacturerList?.manufacturers || []).map((pk) => pk.toString());
-      console.log('Manufacturers:', manufacturers);
-      console.log('Admin key:', ADMIN_PUBLIC_KEY.toString());
-
-      let newRole;
-      if (publicKey === ADMIN_PUBLIC_KEY.toString()) {
-        console.log('Setting role: admin');
-        newRole = 'admin';
-        // Автоматично ініціалізуємо список виробників, якщо адмін підключився
-        await initializeManufacturerList();
-      } else if (manufacturers.includes(publicKey)) {
-        console.log('Setting role: manufacturer');
-        newRole = 'manufacturer';
-      } else {
-        console.log('Setting role: user');
-        newRole = 'user';
-      }
-
-      setRole(newRole);
-      localStorage.setItem('userRole', newRole);
-    } catch (error) {
-      console.error('Error determining user role:', error);
-    }
+    // Temporary mock implementation - Anchor program is disabled for now
+    console.log('Role determination disabled - using mock implementation');
+    const newRole = 'user'; // Default role
+    setRole(newRole);
+    localStorage.setItem('userRole', newRole);
   };
 
   const connectWallet = async () => {
@@ -929,77 +899,12 @@ const App = () => {
     e.preventDefault();
     setIsProcessing(true);
     try {
-      if (!walletAddress) {
-        console.error('Wallet not connected');
+      if (!walletAddress || !window.solana) {
         throw new Error('Please connect your wallet first');
       }
-
-      console.log('Initializing program...');
-      const program = await initializeProgram();
-      if (!program) {
-        console.error('Program initialization failed');
-        throw new Error('Failed to initialize program. Please check if the program is deployed.');
-      }
-
-      // Перевіряємо чи програма розгорнута
-      console.log('Checking if program is deployed...');
-      const programInfo = await connection.getAccountInfo(PROGRAM_ID);
-      if (!programInfo) {
-        console.error('Program not found on chain');
-        throw new Error('Program not found on chain. Please make sure the program is deployed to devnet.');
-      }
-
-      // Перевіряємо чи користувач має права на створення паспорта
-      console.log('Checking user role:', role);
-      if (role !== 'manufacturer' && role !== 'admin') {
-        console.error('User role not authorized:', role);
-        throw new Error('Only manufacturers and admins can create passports');
-      }
-
-      console.log('Finding PDA for passport...');
-      const [passportPda] = PublicKey.findProgramAddressSync([
-        Buffer.from('passport'),
-        Buffer.from(formData.serialNumber),
-      ], PROGRAM_ID);
-
-      // Перевіряємо чи паспорт вже існує
-      console.log('Checking if passport already exists...');
-      try {
-        const existingPassport = await program.account.passport.fetch(passportPda);
-        if (existingPassport) {
-          console.error('Passport already exists:', existingPassport);
-          throw new Error('Passport with this serial number already exists');
-        }
-      } catch (err) {
-        if (!err.message.includes('Account does not exist')) {
-          console.error('Error checking existing passport:', err);
-          throw err;
-        }
-      }
-
-      console.log('Creating passport transaction...');
-      const tx = await program.methods
-        .createPassport(
-          formData.serialNumber,
-          formData.productionDate,
-          formData.deviceModel,
-          formData.warrantyPeriod,
-          formData.countryOfOrigin,
-          formData.manufacturerId || walletAddress,
-          '',
-          new PublicKey(walletAddress)
-        )
-        .accounts({
-          passport: passportPda,
-          manufacturer: new PublicKey(walletAddress),
-          systemProgram: SystemProgram.programId,
-        })
-        .rpc();
-
-      console.log('Transaction signature:', tx);
-      setStatus('Passport created successfully!');
-
-      // Очищаємо форму
+      const address = await mintPassportWithMetaplex(window.solana, file, formData);
+      setStatus('NFT Passport created successfully!');
+      setCreatedNftAddress(address);
       setFormData({
         serialNumber: '',
         productionDate: '',
@@ -1010,50 +915,21 @@ const App = () => {
         ipfsCid: '',
       });
       setFile(null);
-
-      // Оновлюємо список паспортів
-      await fetchPassports();
-
-      // Перенаправляємо на сторінку паспортів
-      window.location.href = '/passports';
+      return address;
     } catch (error) {
-      console.error('Error creating passport:', error);
-      let errorMessage = error.message;
-
-      // Додаткова обробка помилок Anchor
-      if (error.logs) {
-        console.error('Program logs:', error.logs);
-        errorMessage += `\nProgram logs: ${error.logs.join('\n')}`;
-      }
-
-      setStatus(`Error creating passport: ${errorMessage}`);
-      throw error; // Прокидаємо помилку далі для обробки в компоненті
+      setStatus(`Error creating NFT passport: ${error.message}`);
+      throw error;
     } finally {
       setIsProcessing(false);
     }
   };
 
+  const clearCreatedNftAddress = () => setCreatedNftAddress(null);
+
   const fetchPassports = async () => {
-    if (!walletAddress) return;
-    try {
-      const program = await initializeProgram();
-      if (!program) return;
-      const accounts = await program.account.passport.all();
-      const fetchedPassports = accounts
-        .map((account) => ({
-          ...account.account,
-          address: account.publicKey.toString(),
-        }))
-        .filter((passport) =>
-          role === 'user'
-            ? passport.owner.toString() === walletAddress
-            : role === 'manufacturer' && passport.manufacturerId === walletAddress
-        );
-      setPassports(fetchedPassports);
-    } catch (error) {
-      console.error('Error fetching passports:', error);
-      setStatus(`Error fetching passports: ${error.message}`);
-    }
+    // Temporary mock implementation - Anchor program is disabled for now
+    console.log('Fetching passports disabled - using mock implementation');
+    setPassports([]);
   };
 
   const handleSort = (field) => {
@@ -1066,264 +942,15 @@ const App = () => {
   };
 
   const handleQrScan = async (data) => {
-    try {
-      const program = await initializeProgram();
-      if (!program) return;
-
-      const [passportPda] = PublicKey.findProgramAddressSync([
-        Buffer.from('passport'),
-        Buffer.from(data),
-      ], PROGRAM_ID);
-
-      const passport = await program.account.passport.fetch(passportPda);
-      setQrCodeData(passport);
-    } catch (error) {
-      console.error('Error scanning QR:', error);
-      setStatus(`Error scanning QR: ${error.message}`);
-    }
+    // Temporary mock implementation - Anchor program is disabled for now
+    console.log('QR scanning disabled - using mock implementation');
+    setQrCodeData({ serialNumber: data, deviceModel: 'Mock Device' });
   };
 
   const initializeProgram = async () => {
-    try {
-      if (!connection || !window.solana) {
-        throw new Error('Connection or wallet not initialized');
-      }
-      const provider = new AnchorProvider(connection, window.solana, {
-        preflightCommitment: 'confirmed',
-      });
-
-      // Спочатку спробуємо отримати IDL з мережі
-      try {
-        const idl = await Program.fetchIdl(PROGRAM_ID, provider);
-        if (idl) {
-          console.log('Successfully fetched IDL from network');
-          return new Program(idl, PROGRAM_ID, provider);
-        }
-      } catch (err) {
-        console.log('Could not fetch IDL from network, using local version');
-      }
-
-      // Якщо не вдалося отримати IDL з мережі, використовуємо локальну версію
-      const idl = {
-        version: '0.1.0',
-        name: 'smart_passport',
-        instructions: [
-          {
-            name: 'initialize',
-            accounts: [
-              {
-                name: 'manufacturerList',
-                isMut: true,
-                isSigner: false,
-                docs: 'The manufacturer list account'
-              },
-              {
-                name: 'admin',
-                isMut: true,
-                isSigner: true,
-                docs: 'The admin account'
-              },
-              {
-                name: 'systemProgram',
-                isMut: false,
-                isSigner: false,
-                docs: 'The system program'
-              }
-            ],
-            args: []
-          },
-          {
-            name: 'addManufacturer',
-            accounts: [
-              {
-                name: 'manufacturerList',
-                isMut: true,
-                isSigner: false,
-                docs: 'The manufacturer list account'
-              },
-              {
-                name: 'admin',
-                isMut: false,
-                isSigner: true,
-                docs: 'The admin account'
-              }
-            ],
-            args: [
-              {
-                name: 'manufacturer',
-                type: 'publicKey',
-                docs: 'The manufacturer public key'
-              },
-              {
-                name: 'name',
-                type: 'string',
-                docs: 'The manufacturer name'
-              }
-            ]
-          },
-          {
-            name: 'createPassport',
-            accounts: [
-              {
-                name: 'passport',
-                isMut: true,
-                isSigner: false,
-                docs: 'The passport account'
-              },
-              {
-                name: 'manufacturer',
-                isMut: true,
-                isSigner: true,
-                docs: 'The manufacturer account'
-              },
-              {
-                name: 'systemProgram',
-                isMut: false,
-                isSigner: false,
-                docs: 'The system program'
-              }
-            ],
-            args: [
-              {
-                name: 'serialNumber',
-                type: 'string',
-                docs: 'The passport serial number'
-              },
-              {
-                name: 'productionDate',
-                type: 'string',
-                docs: 'The production date'
-              },
-              {
-                name: 'deviceModel',
-                type: 'string',
-                docs: 'The device model'
-              },
-              {
-                name: 'warrantyPeriod',
-                type: 'string',
-                docs: 'The warranty period'
-              },
-              {
-                name: 'countryOfOrigin',
-                type: 'string',
-                docs: 'The country of origin'
-              },
-              {
-                name: 'manufacturerId',
-                type: 'string',
-                docs: 'The manufacturer ID'
-              },
-              {
-                name: 'ipfsCid',
-                type: 'string',
-                docs: 'The IPFS CID'
-              },
-              {
-                name: 'owner',
-                type: 'publicKey',
-                docs: 'The owner account'
-              }
-            ]
-          }
-        ],
-        accounts: [
-          {
-            name: 'ManufacturerList',
-            docs: 'The manufacturer list account',
-            type: {
-              kind: 'struct',
-              fields: [
-                {
-                  name: 'manufacturers',
-                  docs: 'The list of manufacturers',
-                  type: {
-                    vec: {
-                      kind: 'struct',
-                      fields: [
-                        {
-                          name: 'name',
-                          docs: 'The manufacturer name',
-                          type: 'string'
-                        },
-                        {
-                          name: 'pubkey',
-                          docs: 'The manufacturer public key',
-                          type: 'publicKey'
-                        }
-                      ]
-                    }
-                  }
-                }
-              ]
-            }
-          },
-          {
-            name: 'Passport',
-            docs: 'The passport account',
-            type: {
-              kind: 'struct',
-              fields: [
-                {
-                  name: 'serialNumber',
-                  docs: 'The passport serial number',
-                  type: 'string'
-                },
-                {
-                  name: 'productionDate',
-                  docs: 'The production date',
-                  type: 'string'
-                },
-                {
-                  name: 'deviceModel',
-                  docs: 'The device model',
-                  type: 'string'
-                },
-                {
-                  name: 'warrantyPeriod',
-                  docs: 'The warranty period',
-                  type: 'string'
-                },
-                {
-                  name: 'countryOfOrigin',
-                  docs: 'The country of origin',
-                  type: 'string'
-                },
-                {
-                  name: 'manufacturerId',
-                  docs: 'The manufacturer ID',
-                  type: 'string'
-                },
-                {
-                  name: 'ipfsCid',
-                  docs: 'The IPFS CID',
-                  type: 'string'
-                },
-                {
-                  name: 'owner',
-                  docs: 'The owner account',
-                  type: 'publicKey'
-                }
-              ]
-            }
-          }
-        ],
-        errors: [
-          {
-            code: 6000,
-            name: 'ManufacturerAlreadyExists',
-            msg: 'Manufacturer already exists in the list'
-          }
-        ]
-      };
-
-      console.log('Using local IDL version');
-      return new Program(idl, PROGRAM_ID, provider);
-    } catch (error) {
-      console.error('Error initializing program:', error);
-      setStatus(`Error initializing program: ${error.message}`);
-      return null;
-    }
+    // Temporary mock implementation - Anchor program is disabled for now
+    console.log('Program initialization disabled - using mock implementation');
+    return null;
   };
 
   const disconnectWallet = async () => {
@@ -1343,58 +970,9 @@ const App = () => {
   };
 
   const addManufacturer = async (manufacturerAddress, manufacturerName) => {
-    try {
-      if (!walletAddress) {
-        setStatus('Please connect your wallet first');
-        return;
-      }
-
-      if (role !== 'admin') {
-        setStatus('Only admin can add manufacturers');
-        return;
-      }
-
-      const program = await initializeProgram();
-      if (!program) {
-        throw new Error('Failed to initialize program');
-      }
-
-      const [manufacturerListPda] = PublicKey.findProgramAddressSync([
-        Buffer.from('manufacturer_list')
-      ], PROGRAM_ID);
-
-      // Перевіряємо чи список виробників ініціалізований
-      try {
-        await program.account.manufacturerList.fetch(manufacturerListPda);
-      } catch (err) {
-        if (err.message.includes('Account does not exist')) {
-          // Якщо не ініціалізований, спробуємо ініціалізувати
-          await initializeManufacturerList();
-        } else {
-          throw err;
-        }
-      }
-
-      const manufacturerPubkey = new PublicKey(manufacturerAddress);
-
-      const tx = await program.methods
-        .addManufacturer(manufacturerPubkey, manufacturerName)
-        .accounts({
-          manufacturerList: manufacturerListPda,
-          admin: new PublicKey(walletAddress),
-        })
-        .rpc();
-
-      console.log('Add manufacturer transaction:', tx);
-      setStatus('Manufacturer added successfully!');
-
-      // Оновлюємо список виробників
-      const manufacturerList = await program.account.manufacturerList.fetch(manufacturerListPda);
-      console.log('Updated manufacturer list:', manufacturerList);
-    } catch (error) {
-      console.error('Error adding manufacturer:', error);
-      setStatus(`Error adding manufacturer: ${error.message}`);
-    }
+    // Temporary mock implementation - Anchor program is disabled for now
+    console.log('Adding manufacturer disabled - using mock implementation');
+    setStatus('Manufacturer added successfully! (Mock)');
   };
 
   if (isLoading) {
@@ -1431,6 +1009,8 @@ const App = () => {
                     file={file}
                     status={status}
                     isProcessing={isProcessing}
+                    nftAddress={createdNftAddress}
+                    clearNftAddress={clearCreatedNftAddress}
                   />
                 ) : (
                   <Navigate to="/" />
@@ -1478,7 +1058,7 @@ const App = () => {
         )}
         {isProcessing && (
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-            <LoadingSpinner size="lg" text="Creating passport..." />
+            <LoadingSpinner size="lg" text="Creating NFT passport..." />
           </div>
         )}
       </div>

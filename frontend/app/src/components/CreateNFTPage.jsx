@@ -3,6 +3,12 @@ import { motion } from 'framer-motion';
 import QRCode from 'qrcode.react';
 import { useTranslation } from 'react-i18next';
 import { ArrowUpTrayIcon } from '@heroicons/react/24/outline';
+import { Buffer } from 'buffer'
+import process from 'process'
+import { getSolanaExplorerUrl } from '../utils/nftUtils';
+
+if (!window.Buffer) window.Buffer = Buffer
+if (!window.process) window.process = process
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
@@ -13,27 +19,76 @@ const CreateNFTPage = ({
   file,
   status,
   isProcessing,
+  mintPassport,
+  nftAddress,
+  clearNftAddress,
 }) => {
   const { t } = useTranslation();
   const [previewUrl, setPreviewUrl] = useState(null);
-  const [nftAddress, setNftAddress] = useState(null);
   const [qrCodeUrl, setQrCodeUrl] = useState(null);
   const [localStatus, setLocalStatus] = useState('');
 
-  // Функція для генерації мокової NFT адреси
-  const generateMockAddress = () => {
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-    let result = '';
-    for (let i = 0; i < 32; i++) {
-      result += chars.charAt(Math.floor(Math.random() * chars.length));
+  useEffect(() => {
+    if (nftAddress) {
+      setQrCodeUrl(getSolanaExplorerUrl(nftAddress));
     }
-    return result;
-  };
+  }, [nftAddress]);
 
   const handleFileUpload = (e) => {
     if (e.target.files && e.target.files[0]) {
       const selectedFile = e.target.files[0];
+      
+      // Check file size (10MB limit)
+      const maxSize = 10 * 1024 * 1024; // 10MB
+      if (selectedFile.size > maxSize) {
+        alert('File size must be less than 10MB');
+        return;
+      }
+      
+      // Check file type
+      if (!selectedFile.type.startsWith('image/')) {
+        alert('Please select an image file');
+        return;
+      }
+      
       handleFileChange(e);
+      const objectUrl = URL.createObjectURL(selectedFile);
+      setPreviewUrl(objectUrl);
+    }
+  };
+
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    e.currentTarget.classList.add('border-blue-500', 'bg-blue-500/10');
+  };
+
+  const handleDragLeave = (e) => {
+    e.preventDefault();
+    e.currentTarget.classList.remove('border-blue-500', 'bg-blue-500/10');
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    e.currentTarget.classList.remove('border-blue-500', 'bg-blue-500/10');
+    
+    const files = e.dataTransfer.files;
+    if (files && files[0]) {
+      const selectedFile = files[0];
+      
+      // Check file size (10MB limit)
+      const maxSize = 10 * 1024 * 1024; // 10MB
+      if (selectedFile.size > maxSize) {
+        alert('File size must be less than 10MB');
+        return;
+      }
+      
+      // Check file type
+      if (!selectedFile.type.startsWith('image/')) {
+        alert('Please select an image file');
+        return;
+      }
+      
+      handleFileChange({ target: { files: [selectedFile] } });
       const objectUrl = URL.createObjectURL(selectedFile);
       setPreviewUrl(objectUrl);
     }
@@ -41,31 +96,10 @@ const CreateNFTPage = ({
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLocalStatus('Creating passport...');
-
+    setLocalStatus('Creating NFT passport...');
     try {
-      // Генеруємо мокову NFT адресу
-      const mockAddress = generateMockAddress();
-      
-      // Створюємо об'єкт паспорта
-      const passport = {
-        address: mockAddress,
-        ...formData,
-        imageUrl: previewUrl,
-        createdAt: new Date().toISOString(),
-      };
-
-      // Зберігаємо в localStorage
-      const savedPassports = JSON.parse(localStorage.getItem('passports') || '[]');
-      savedPassports.push(passport);
-      localStorage.setItem('passports', JSON.stringify(savedPassports));
-
-      // Встановлюємо адресу та QR код
-      setNftAddress(mockAddress);
-      setQrCodeUrl(`https://explorer.solana.com/address/${mockAddress}?cluster=devnet`);
-      setLocalStatus('Passport created successfully!');
-
-      // Очищаємо форму
+      await mintPassport(e);
+      setLocalStatus('NFT passport created successfully!');
       e.target.reset();
       setPreviewUrl(null);
       handleFileChange({ target: { files: [] } });
@@ -76,12 +110,10 @@ const CreateNFTPage = ({
       handleInputChange({ target: { name: 'countryOfOrigin', value: '' } });
       handleInputChange({ target: { name: 'manufacturerId', value: '' } });
     } catch (error) {
-      console.error('Error creating passport:', error);
-      setLocalStatus(`Error creating passport: ${error.message}`);
+      setLocalStatus(`Error creating NFT passport: ${error.message}`);
     }
   };
 
-  // Очищаємо URL превью при розмонтуванні компонента
   useEffect(() => {
     return () => {
       if (previewUrl) {
@@ -99,7 +131,7 @@ const CreateNFTPage = ({
           className="bg-gray-800/50 rounded-2xl p-6 sm:p-8 shadow-xl border border-gray-700/50"
         >
           <h1 className="text-3xl font-bold text-white mb-8 text-center">
-            Create Product Passport
+            Create NFT Product Passport
           </h1>
 
           {!nftAddress ? (
@@ -198,7 +230,14 @@ const CreateNFTPage = ({
                 <label className="block text-sm font-medium text-gray-300 mb-2">
                   Product Image
                 </label>
-                <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-600 border-dashed rounded-lg hover:border-blue-500 transition-colors">
+                
+                {/* File Upload Area */}
+                <div 
+                  className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-600 border-dashed rounded-lg hover:border-blue-500 transition-colors"
+                  onDragOver={handleDragOver}
+                  onDragLeave={handleDragLeave}
+                  onDrop={handleDrop}
+                >
                   <div className="space-y-1 text-center">
                     <ArrowUpTrayIcon className="mx-auto h-12 w-12 text-gray-400" />
                     <div className="flex text-sm text-gray-400">
@@ -221,6 +260,44 @@ const CreateNFTPage = ({
                     <p className="text-xs text-gray-500">PNG, JPG, GIF up to 10MB</p>
                   </div>
                 </div>
+                
+                {/* Image Preview */}
+                {previewUrl && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="mt-4"
+                  >
+                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                      Preview
+                    </label>
+                    <div className="relative inline-block">
+                      <img
+                        src={previewUrl}
+                        alt="Product preview"
+                        className="max-w-full h-48 object-cover rounded-lg border border-gray-600"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setPreviewUrl(null);
+                          handleFileChange({ target: { files: [] } });
+                        }}
+                        className="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm transition-colors"
+                        title="Remove image"
+                      >
+                        ×
+                      </button>
+                    </div>
+                    {file && (
+                      <div className="mt-2 text-sm text-gray-400">
+                        <p>File: {file.name}</p>
+                        <p>Size: {(file.size / 1024 / 1024).toFixed(2)} MB</p>
+                        <p>Type: {file.type}</p>
+                      </div>
+                    )}
+                  </motion.div>
+                )}
               </div>
 
               <motion.button
@@ -237,10 +314,10 @@ const CreateNFTPage = ({
                 {isProcessing ? (
                   <div className="flex items-center justify-center gap-2">
                     <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                    Creating Passport...
+                    Creating NFT...
                   </div>
                 ) : (
-                  'Create Passport'
+                  'Create NFT Passport'
                 )}
               </motion.button>
             </form>
@@ -250,7 +327,8 @@ const CreateNFTPage = ({
               animate={{ opacity: 1 }}
               className="text-center"
             >
-              <h2 className="text-2xl font-bold text-white mb-6">NFT Passport Created!</h2>
+              <h2 className="text-2xl font-bold text-white mb-6">NFT Product Passport Created!</h2>
+
               <div className="bg-gray-700/30 p-6 rounded-xl mb-6">
                 <QRCode
                   value={qrCodeUrl}
@@ -259,7 +337,7 @@ const CreateNFTPage = ({
                   includeMargin={true}
                   className="mx-auto mb-4"
                 />
-                <p className="text-gray-300 mb-4">Scan this QR code to view the product passport</p>
+                <p className="text-gray-300 mb-4">Scan this QR code to view the NFT product passport</p>
                 <a
                   href={qrCodeUrl}
                   target="_blank"
@@ -272,13 +350,10 @@ const CreateNFTPage = ({
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                onClick={() => {
-                  setNftAddress(null);
-                  setQrCodeUrl(null);
-                }}
+                onClick={clearNftAddress}
                 className="px-6 py-3 rounded-lg bg-gradient-to-r from-blue-500 to-purple-500 text-white font-medium hover:shadow-lg hover:shadow-blue-500/25 transition-all"
               >
-                Create Another Passport
+                Create Another NFT Passport
               </motion.button>
             </motion.div>
           )}

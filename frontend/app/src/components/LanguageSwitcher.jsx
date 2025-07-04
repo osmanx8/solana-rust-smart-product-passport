@@ -1,25 +1,27 @@
 import React, { useState } from 'react';
-import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useLanguage } from '../hooks/useLanguage';
 
 const LanguageSwitcher = () => {
-  const { i18n } = useTranslation();
+  const { currentLanguage, changeLanguage, getCurrentLanguage, getSupportedLanguages } = useLanguage();
   const [isOpen, setIsOpen] = useState(false);
 
-  const languages = [
-    { code: 'en', label: 'EN' },
-    { code: 'uk', label: 'UA' }
-  ];
+  const handleLanguageChange = (langCode) => {
+    changeLanguage(langCode);
+    setIsOpen(false);
+  };
 
-  const currentLanguage = languages.find(lang => lang.code === i18n.language) || languages[0];
+  const currentLang = getCurrentLanguage();
+  const supportedLanguages = getSupportedLanguages();
 
   return (
     <div className="relative">
       <button
         onClick={() => setIsOpen(!isOpen)}
         className="w-12 h-8 flex items-center justify-center rounded-lg bg-gray-800/50 border border-gray-700/50 hover:bg-gray-700/50 transition-all"
+        aria-label={`Current language: ${currentLang.label}`}
       >
-        <span className="text-sm font-medium text-gray-300">{currentLanguage.label}</span>
+        <span className="text-sm font-medium text-gray-300">{currentLang.label}</span>
       </button>
 
       <AnimatePresence>
@@ -28,20 +30,18 @@ const LanguageSwitcher = () => {
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
-            className="absolute right-0 mt-2 w-12 bg-gray-800 rounded-lg shadow-xl border border-gray-700/50 overflow-hidden"
+            className="absolute right-0 mt-2 w-12 bg-gray-800 rounded-lg shadow-xl border border-gray-700/50 overflow-hidden z-50"
           >
-            {languages.map((lang) => (
+            {supportedLanguages.map((lang) => (
               <button
                 key={lang.code}
-                onClick={() => {
-                  i18n.changeLanguage(lang.code);
-                  setIsOpen(false);
-                }}
+                onClick={() => handleLanguageChange(lang.code)}
                 className={`w-full px-2 py-1.5 flex items-center justify-center text-sm font-medium transition-colors ${
-                  lang.code === currentLanguage.code
+                  lang.code === currentLanguage
                     ? 'bg-gray-700/50 text-white'
                     : 'text-gray-300 hover:bg-gray-700/30'
                 }`}
+                aria-label={`Switch to ${lang.label}`}
               >
                 {lang.label}
               </button>
