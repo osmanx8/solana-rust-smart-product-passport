@@ -139,21 +139,9 @@ const Navigation = ({ walletAddress, role, connectWallet, disconnectWallet, addM
                     <HomeIcon className="w-4 h-4 mr-2" />
                     {t('main')}
                   </NavLink>
-                  <NavLink to="/passports" className="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium flex items-center transition-colors">
-                    <DocumentTextIcon className="w-4 h-4 mr-2" />
-                    {t('passports')}
-                  </NavLink>
-                  <NavLink to="/scan" className="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium flex items-center transition-colors">
-                    <CameraIcon className="w-4 h-4 mr-2" />
-                    {t('scan')}
-                  </NavLink>
                   <NavLink to="/create-nft" className="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium flex items-center transition-colors">
                     <PlusIcon className="w-4 h-4 mr-2" />
                     {t('createNFT')}
-                  </NavLink>
-                  <NavLink to="/about" className="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium flex items-center transition-colors">
-                    <InformationCircleIcon className="w-4 h-4 mr-2" />
-                    {t('about')}
                   </NavLink>
                 </div>
               </div>
@@ -203,15 +191,7 @@ const Navigation = ({ walletAddress, role, connectWallet, disconnectWallet, addM
                       onClick={() => setShowUserMenu(false)}
                     >
                       <PlusIcon className="w-4 h-4" />
-                      {t('create_passport')}
-                    </Link>
-                    <Link
-                      to="/scan"
-                      className="flex items-center gap-2 px-4 py-2 text-gray-300 hover:text-white hover:bg-gray-700/50 transition-colors"
-                      onClick={() => setShowUserMenu(false)}
-                    >
-                      <CameraIcon className="w-4 h-4" />
-                      {t('scan')}
+                      {t('createNFT')}
                     </Link>
                     <button
                       onClick={() => {
@@ -761,6 +741,25 @@ const Footer = () => {
         />
         <span className="text-white font-semibold text-lg">Smart Product Passport</span>
       </div>
+      
+      {/* Навігаційні посилання */}
+      <div className="flex gap-6 justify-center items-center mb-2">
+        <Link
+          to="/about"
+          className="text-gray-400 hover:text-white transition-colors text-sm font-medium flex items-center gap-1"
+        >
+          <InformationCircleIcon className="w-4 h-4" />
+          {t('about')}
+        </Link>
+        <Link
+          to="/scan"
+          className="text-gray-400 hover:text-white transition-colors text-sm font-medium flex items-center gap-1"
+        >
+          <CameraIcon className="w-4 h-4" />
+          {t('scan')}
+        </Link>
+      </div>
+      
       <span className="text-sm">{t('footer_text')}</span>
       <div className="flex gap-4 justify-center items-center mt-2">
         <a
