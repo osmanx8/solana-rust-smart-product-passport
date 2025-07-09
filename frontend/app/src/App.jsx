@@ -18,6 +18,7 @@ import updateDrivers from './assets/comics/drivers_updating_comic.png';
 import whiteLogo from './assets/SPP_logo_white.png';
 import { requestAirdrop } from './utils/airdrop';
 import { mintPassportWithMetaplex } from './utils/nftCreator';
+import { getOrCreateCollection } from './utils/collectionCreator';
 import FAQ from './components/FAQ';
 import Community from './components/Community';
 import ThreeDBoxSection from './components/ThreeDBoxSection';
@@ -56,6 +57,7 @@ import {
   ArrowTopRightOnSquareIcon,
   CreditCardIcon
 } from '@heroicons/react/24/outline';
+import { Metaplex } from '@metaplex-foundation/js';
 
 const Navigation = ({ walletAddress, role, connectWallet, disconnectWallet, addManufacturer }) => {
   const { t } = useTranslation();
@@ -785,8 +787,6 @@ const Footer = () => {
 
 const connection = new Connection(clusterApiUrl('devnet'));
 
-
-
 const App = () => {
   const { t } = useTranslation();
   const [walletAddress, setWalletAddress] = useState(null);
@@ -803,6 +803,7 @@ const App = () => {
     countryOfOrigin: '',
     manufacturerId: '',
     ipfsCid: '',
+    collectionName: '',
   });
   const [file, setFile] = useState(null);
   const [status, setStatus] = useState('');
@@ -814,6 +815,7 @@ const App = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isProcessing, setIsProcessing] = useState(false);
   const [createdNftAddress, setCreatedNftAddress] = useState(null);
+  const [collectionImage, setCollectionImage] = useState(null);
 
   const connection = new Connection('https://api.devnet.solana.com', 'confirmed');
   const PROGRAM_ID = new PublicKey(import.meta.env.VITE_PROGRAM_ID || '8tdpknetCPXv5Ztk8yoJWceRCgCxp3T6U56TnUGk99t4');
@@ -901,7 +903,7 @@ const App = () => {
       if (!walletAddress || !window.solana) {
         throw new Error('Please connect your wallet first');
       }
-      const address = await mintPassportWithMetaplex(window.solana, file, formData);
+      const address = await mintPassportWithMetaplex(window.solana, file, formData, collectionImage);
       setStatus('NFT Passport created successfully!');
       setCreatedNftAddress(address);
       setFormData({
@@ -912,8 +914,11 @@ const App = () => {
         countryOfOrigin: '',
         manufacturerId: '',
         ipfsCid: '',
+        collectionName: '',
       });
       setFile(null);
+      setCollectionImage(null);
+      await fetchPassports();
       return address;
     } catch (error) {
       setStatus(`Error creating NFT passport: ${error.message}`);
@@ -926,9 +931,61 @@ const App = () => {
   const clearCreatedNftAddress = () => setCreatedNftAddress(null);
 
   const fetchPassports = async () => {
-    // Temporary mock implementation - Anchor program is disabled for now
-    console.log('Fetching passports disabled - using mock implementation');
-    setPassports([]);
+    if (!walletAddress) return;
+    try {
+      setIsLoading(true);
+      const connection = new Connection(clusterApiUrl('devnet'), 'confirmed');
+      const metaplex = new Metaplex(connection);
+      const owner = new PublicKey(walletAddress);
+      const nfts = await metaplex.nfts().findAllByOwner({ owner });
+
+      console.log('=== Знайдено NFT у гаманці ===');
+      nfts.forEach((nft, idx) => {
+        console.log(`#${idx + 1}:`, {
+          address: nft.address?.toString?.() || nft.address,
+          name: nft.name,
+          symbol: nft.symbol,
+          uri: nft.uri
+        });
+      });
+
+      // Завантажуємо метадані для кожного NFT
+      const passports = await Promise.all(
+        nfts.map(async (nft, idx) => {
+          try {
+            const metadataUri = nft.uri;
+            if (!metadataUri) return null;
+            const response = await fetch(metadataUri);
+            let metadata = null;
+            try {
+              metadata = await response.json();
+            } catch (e) {
+              console.warn(`Не вдалося розпарсити metadata для NFT #${idx + 1} (${metadataUri})`);
+              return null;
+            }
+            console.log(`Metadata для NFT #${idx + 1} (${metadataUri}):`, metadata);
+            return {
+              address: nft.address.toString(),
+              serialNumber: metadata.serialNumber || '',
+              productionDate: metadata.productionDate || '',
+              deviceModel: metadata.deviceModel || '',
+              warrantyPeriod: metadata.warrantyPeriod || '',
+              countryOfOrigin: metadata.countryOfOrigin || '',
+              ipfsCid: metadata.ipfsCid || '',
+            };
+          } catch (e) {
+            console.warn(`Помилка при fetch metadata для NFT #${idx + 1}:`, e);
+            return null;
+          }
+        })
+      );
+      setPassports(passports.filter(Boolean));
+    } catch (error) {
+      console.error('Error fetching passports:', error);
+      setPassports([]);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleSort = (field) => {
@@ -1001,15 +1058,17 @@ const App = () => {
               element={
                 walletAddress ? (
                   <CreateNFTPage
-                    mintPassport={mintPassport}
                     handleInputChange={handleInputChange}
                     handleFileChange={handleFileChange}
                     formData={formData}
                     file={file}
                     status={status}
                     isProcessing={isProcessing}
+                    mintPassport={mintPassport}
                     nftAddress={createdNftAddress}
                     clearNftAddress={clearCreatedNftAddress}
+                    collectionImage={collectionImage}
+                    setCollectionImage={setCollectionImage}
                   />
                 ) : (
                   <Navigate to="/" />

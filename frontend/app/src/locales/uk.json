@@ -94,5 +94,17 @@
   "3d_demo_title": "3D NFT демо: Скануй та отримуй!",
   "3d_demo_desc": "Спробуйте наші можливості: обертайте 3D коробку, проскануйте QR-код та отримайте тестовий NFT. Це демонстрація для виробників, драйверів, споживачів. NFT безкоштовний!",
   "3d_demo_nft_title": "Тестове NFT:",
-  "3d_demo_nft_desc": "Виробник: SPP Demo | Категорія: драйвери | Для тесту — відскануйте QR-код та отримайте NFT у свій гаманець Solana."
+  "3d_demo_nft_desc": "Виробник: SPP Demo | Категорія: драйвери | Для тесту — відскануйте QR-код та отримайте NFT у свій гаманець Solana.",
+  "createNFTProductPassport": "Новий паспорт продукту",
+  "collection": "Колекція",
+  "collection_placeholder": "Виберіть колекцію",
+  "collection_category": "Категорія",
+  "collection_name": "Назва колекції",
+  "collection_electronics": "Електроніка",
+  "collection_clothing": "Одяг",
+  "collection_furniture": "Меблі",
+  "collection_automotive": "Автомобільна промисловість",
+  "collection_healthcare": "Охорона здоров'я",
+  "collection_food": "Продукти харчування",
+  "collection_other": "Інше"
 } 

@@ -1,12 +1,14 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   PlusIcon,
   ChevronUpIcon,
   ChevronDownIcon,
   ArrowTopRightOnSquareIcon,
+  ExclamationTriangleIcon,
 } from "@heroicons/react/24/outline";
 import { Button } from "./ui/button";
+import { fetchNftsByOwner, checkBackendHealth } from '../utils/nftCreator';
 
 const PassportsPage = ({ 
   role, 
@@ -17,12 +19,84 @@ const PassportsPage = ({
   mintPassport,
   handleSort,
   sortField,
-  sortOrder
+  sortOrder,
+  wallet
 }) => {
   const [showForm, setShowForm] = useState(false);
+  const [backendStatus, setBackendStatus] = useState('checking');
+  const [nfts, setNfts] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+
+  // Перевіряємо статус бекенду
+  useEffect(() => {
+    const checkBackend = async () => {
+      try {
+        const isHealthy = await checkBackendHealth();
+        setBackendStatus(isHealthy ? 'healthy' : 'unhealthy');
+      } catch (error) {
+        console.error('Backend health check failed:', error);
+        setBackendStatus('unhealthy');
+      }
+    };
+    
+    checkBackend();
+  }, []);
+
+  // Завантажуємо NFT при зміні гаманця
+  useEffect(() => {
+    if (wallet && wallet.publicKey && backendStatus === 'healthy') {
+      loadNfts();
+    }
+  }, [wallet, backendStatus]);
+
+  const loadNfts = async () => {
+    if (!wallet?.publicKey) return;
+    
+    setLoading(true);
+    setError(null);
+    
+    try {
+      const walletAddress = wallet.publicKey.toString();
+      const nftData = await fetchNftsByOwner(walletAddress);
+      setNfts(nftData);
+    } catch (error) {
+      console.error('Failed to load NFTs:', error);
+      setError(error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+      {/* Backend Status Indicator */}
+      {backendStatus === 'checking' && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="mb-4 p-4 bg-yellow-500/10 border border-yellow-500/20 rounded-lg"
+        >
+          <div className="flex items-center gap-2 text-yellow-400">
+            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-yellow-400"></div>
+            Перевірка підключення до бекенду...
+          </div>
+        </motion.div>
+      )}
+
+      {backendStatus === 'unhealthy' && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="mb-4 p-4 bg-red-500/10 border border-red-500/20 rounded-lg"
+        >
+          <div className="flex items-center gap-2 text-red-400">
+            <ExclamationTriangleIcon className="w-5 h-5" />
+            Бекенд недоступний. Перевірте підключення.
+          </div>
+        </motion.div>
+      )}
+
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -31,7 +105,7 @@ const PassportsPage = ({
         <h1 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500">
           Паспорти продуктів
         </h1>
-        {(role === 'manufacturer' || role === 'admin') && (
+        {(role === 'manufacturer' || role === 'admin') && backendStatus === 'healthy' && (
           <Button
             onClick={() => setShowForm(!showForm)}
             className="mb-6 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg flex items-center gap-2 transition-all duration-300 hover:scale-105"
@@ -43,7 +117,7 @@ const PassportsPage = ({
       </motion.div>
 
       <AnimatePresence>
-        {showForm && (role === 'manufacturer' || role === 'admin') && (
+        {showForm && (role === 'manufacturer' || role === 'admin') && backendStatus === 'healthy' && (
           <motion.div
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
@@ -157,25 +231,11 @@ const PassportsPage = ({
                   className="px-6 py-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider cursor-pointer hover:bg-gray-700/50 transition-colors"
                 >
                   <button
-                    onClick={() => handleSort('serialNumber')}
+                    onClick={() => handleSort('name')}
                     className="flex items-center gap-2 px-4 py-2 text-left hover:bg-gray-100 transition-colors"
                   >
-                    Серійний номер
-                    {sortField === 'serialNumber' && (
-                      sortOrder === 'asc' ? <ChevronUpIcon className="w-4 h-4" /> : <ChevronDownIcon className="w-4 h-4" />
-                    )}
-                  </button>
-                </th>
-                <th
-                  scope="col"
-                  className="px-6 py-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider cursor-pointer hover:bg-gray-700/50 transition-colors"
-                >
-                  <button
-                    onClick={() => handleSort('productionDate')}
-                    className="flex items-center gap-2 px-4 py-2 text-left hover:bg-gray-100 transition-colors"
-                  >
-                    Дата виробництва
-                    {sortField === 'productionDate' && (
+                    Назва NFT
+                    {sortField === 'name' && (
                       sortOrder === 'asc' ? <ChevronUpIcon className="w-4 h-4" /> : <ChevronDownIcon className="w-4 h-4" />
                     )}
                   </button>
@@ -184,56 +244,92 @@ const PassportsPage = ({
                   scope="col"
                   className="px-6 py-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider"
                 >
-                  Модель
+                  Метадані
                 </th>
                 <th
                   scope="col"
                   className="px-6 py-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider"
                 >
-                  Гарантія
+                  Символ
                 </th>
                 <th
                   scope="col"
                   className="px-6 py-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider"
                 >
-                  Країна
+                  Колекція
                 </th>
                 <th
                   scope="col"
                   className="px-6 py-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider"
                 >
-                  Документи
+                  Власник
+                </th>
+                <th
+                  scope="col"
+                  className="px-6 py-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider"
+                >
+                  Дії
                 </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-700">
-              {passports.map((passport) => (
+              {loading && (
+                <tr>
+                  <td colSpan="6" className="px-6 py-8 text-center">
+                    <div className="flex items-center justify-center gap-2 text-gray-400">
+                      <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500"></div>
+                      Завантаження NFT...
+                    </div>
+                  </td>
+                </tr>
+              )}
+
+              {error && (
+                <tr>
+                  <td colSpan="6" className="px-6 py-8 text-center">
+                    <div className="flex items-center justify-center gap-2 text-red-400">
+                      <ExclamationTriangleIcon className="w-5 h-5" />
+                      Помилка завантаження: {error}
+                    </div>
+                  </td>
+                </tr>
+              )}
+
+              {!loading && !error && nfts.length === 0 && (
+                <tr>
+                  <td colSpan="6" className="px-6 py-8 text-center text-gray-400">
+                    NFT не знайдено. Створіть свій перший паспорт!
+                  </td>
+                </tr>
+              )}
+
+              {!loading && !error && nfts.map((nft) => (
                 <motion.tr
-                  key={passport.address}
+                  key={nft.address}
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   whileHover={{ backgroundColor: 'rgba(55, 65, 81, 0.3)' }}
                   className="transition-colors"
                 >
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
-                    {passport.serialNumber}
+                    {nft.name || 'N/A'}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
-                    {passport.productionDate}
+                    {nft.uri ? 'Так' : 'Немає'}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
-                    {passport.deviceModel}
+                    {nft.symbol || 'N/A'}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
-                    {passport.warrantyPeriod}
+                    {nft.collection || 'Немає'}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
-                    {passport.countryOfOrigin}
+                    {nft.owner ? `${nft.owner.slice(0, 4)}...${nft.owner.slice(-4)}` : 'N/A'}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
-                    {passport.ipfsCid ? (
+                    {nft.uri ? (
                       <button
-                        onClick={() => handleViewPassport(passport)}
+                        onClick={() => window.open(nft.uri, '_blank')}
                         className="text-blue-400 hover:text-blue-300 transition-colors flex items-center gap-1"
                       >
                         Переглянути <ArrowTopRightOnSquareIcon className="w-4 h-4" />

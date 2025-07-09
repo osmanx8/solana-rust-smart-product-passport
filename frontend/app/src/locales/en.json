@@ -6,6 +6,7 @@
   "about": "About",
   "main": "Home",
   "createNFT": "New Passport",
+  "createNFTProductPassport": "Create NFT Product Passport",
   "language": "Language",
   "english": "English",
   "ukrainian": "Ukrainian",
@@ -105,5 +106,16 @@
   "3d_demo_title": "3D NFT Demo: Scan & Claim!",
   "3d_demo_desc": "Try our capabilities: rotate the 3D box, scan the QR code, and get a test NFT. This is a demonstration for manufacturers, drivers, consumers. NFT is free!",
   "3d_demo_nft_title": "Test NFT:",
-  "3d_demo_nft_desc": "Manufacturer: SPP Demo | Category: drivers | For testing — scan the QR code and get the NFT to your Solana wallet."
+  "3d_demo_nft_desc": "Manufacturer: SPP Demo | Category: drivers | For testing — scan the QR code and get the NFT to your Solana wallet.",
+  "collection": "Collection",
+  "collection_placeholder": "Select collection",
+  "collection_category": "Category",
+  "collection_name": "Collection name",
+  "collection_electronics": "Electronics",
+  "collection_clothing": "Clothing",
+  "collection_furniture": "Furniture",
+  "collection_automotive": "Automotive",
+  "collection_healthcare": "Healthcare",
+  "collection_food": "Food & Beverage",
+  "collection_other": "Other"
 } 

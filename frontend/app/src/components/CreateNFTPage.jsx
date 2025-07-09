@@ -6,6 +6,7 @@ import { ArrowUpTrayIcon } from '@heroicons/react/24/outline';
 import { Buffer } from 'buffer'
 import process from 'process'
 import { getSolanaExplorerUrl } from '../utils/nftUtils';
+import CostCalculator from './CostCalculator';
 
 if (!window.Buffer) window.Buffer = Buffer
 if (!window.process) window.process = process
@@ -22,11 +23,14 @@ const CreateNFTPage = ({
   mintPassport,
   nftAddress,
   clearNftAddress,
+  collectionImage,
+  setCollectionImage,
 }) => {
   const { t } = useTranslation();
   const [previewUrl, setPreviewUrl] = useState(null);
   const [qrCodeUrl, setQrCodeUrl] = useState(null);
   const [localStatus, setLocalStatus] = useState('');
+  const [collectionImagePreview, setCollectionImagePreview] = useState(null);
 
   useEffect(() => {
     if (nftAddress) {
@@ -94,8 +98,24 @@ const CreateNFTPage = ({
     }
   };
 
+  const handleCollectionImageChange = (e) => {
+    if (e.target.files && e.target.files[0]) {
+      const selectedFile = e.target.files[0];
+      if (!selectedFile.type.startsWith('image/')) {
+        alert('Please select an image file');
+        return;
+      }
+      setCollectionImage(selectedFile);
+      setCollectionImagePreview(URL.createObjectURL(selectedFile));
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!collectionImage) {
+      alert('Будь ласка, виберіть зображення для колекції (Collection Image)');
+      return;
+    }
     setLocalStatus('Creating NFT passport...');
     try {
       await mintPassport(e);
@@ -109,6 +129,7 @@ const CreateNFTPage = ({
       handleInputChange({ target: { name: 'warrantyPeriod', value: '' } });
       handleInputChange({ target: { name: 'countryOfOrigin', value: '' } });
       handleInputChange({ target: { name: 'manufacturerId', value: '' } });
+      handleInputChange({ target: { name: 'collectionName', value: '' } });
     } catch (error) {
       setLocalStatus(`Error creating NFT passport: ${error.message}`);
     }
@@ -131,8 +152,13 @@ const CreateNFTPage = ({
           className="bg-gray-800/50 rounded-2xl p-6 sm:p-8 shadow-xl border border-gray-700/50"
         >
           <h1 className="text-3xl font-bold text-white mb-8 text-center">
-            Create NFT Product Passport
+            {t('createNFTProductPassport')}
           </h1>
+
+          {/* Калькулятор комісій */}
+          <div className="mb-8">
+            <CostCalculator />
+          </div>
 
           {!nftAddress ? (
             <form onSubmit={handleSubmit} className="space-y-6">
@@ -224,6 +250,21 @@ const CreateNFTPage = ({
                     placeholder="Enter manufacturer ID (optional)"
                   />
                 </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    {t('collection_name')}
+                  </label>
+                  <input
+                    type="text"
+                    name="collectionName"
+                    value={formData.collectionName}
+                    onChange={handleInputChange}
+                    required
+                    className="w-full bg-gray-700/50 text-white px-4 py-2 rounded-lg border border-gray-600 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors"
+                    placeholder={t('collection_name')}
+                  />
+                </div>
               </div>
 
               <div className="mt-6">
@@ -294,6 +335,66 @@ const CreateNFTPage = ({
                         <p>File: {file.name}</p>
                         <p>Size: {(file.size / 1024 / 1024).toFixed(2)} MB</p>
                         <p>Type: {file.type}</p>
+                      </div>
+                    )}
+                  </motion.div>
+                )}
+              </div>
+
+              <div className="mt-6">
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  Collection Image
+                </label>
+                <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-600 border-dashed rounded-lg hover:border-blue-500 transition-colors">
+                  <div className="space-y-1 text-center">
+                    <ArrowUpTrayIcon className="mx-auto h-12 w-12 text-gray-400" />
+                    <div className="flex text-sm text-gray-400">
+                      <label
+                        htmlFor="collection-image-upload"
+                        className="relative cursor-pointer bg-transparent rounded-md font-medium text-blue-400 hover:text-blue-300 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-blue-500"
+                      >
+                        <span>Upload a file</span>
+                        <input
+                          id="collection-image-upload"
+                          name="collection-image-upload"
+                          type="file"
+                          accept="image/*"
+                          onChange={handleCollectionImageChange}
+                          className="sr-only"
+                          required
+                        />
+                      </label>
+                      <p className="pl-1">or drag and drop</p>
+                    </div>
+                    <p className="text-xs text-gray-500">PNG, JPG, GIF up to 10MB</p>
+                  </div>
+                </div>
+                {collectionImagePreview && (
+                  <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="mt-4">
+                    <label className="block text-sm font-medium text-gray-300 mb-2">Preview</label>
+                    <div className="relative inline-block">
+                      <img
+                        src={collectionImagePreview}
+                        alt="Collection preview"
+                        className="max-w-full h-48 object-cover rounded-lg border border-gray-600"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setCollectionImage(null);
+                          setCollectionImagePreview(null);
+                        }}
+                        className="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm transition-colors"
+                        title="Remove image"
+                      >
+                        ×
+                      </button>
+                    </div>
+                    {collectionImage && (
+                      <div className="mt-2 text-sm text-gray-400">
+                        <p>File: {collectionImage.name}</p>
+                        <p>Size: {(collectionImage.size / 1024 / 1024).toFixed(2)} MB</p>
+                        <p>Type: {collectionImage.type}</p>
                       </div>
                     )}
                   </motion.div>

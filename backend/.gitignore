@@ -1,0 +1,33 @@
+# Rust
+/target/
+Cargo.lock
+
+# Environment variables
+.env
+.env.local
+.env.production
+
+# Private keys - CRITICAL!
+keypair.json
+treasury_keypair.json
+*.keypair
+*.pem
+*.p12
+*.pfx
+
+# Logs
+*.log
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.temp 
