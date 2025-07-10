@@ -4,7 +4,7 @@
       "test": "ts-mocha -p ./tsconfig.json -t 1000000 tests/**/*.ts"
     },
     "dependencies": {
-      "@project-serum/anchor": "^0.26.0"
+      "@coral-xyz/anchor": "^0.31.1"
     },
     "devDependencies": {
       "@types/mocha": "^10.0.1",

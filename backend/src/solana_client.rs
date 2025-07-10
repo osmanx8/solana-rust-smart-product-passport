@@ -1,5 +1,5 @@
 use anyhow::{Result, anyhow};
-use solana_client::rpc_client::RpcClient;
+use solana_client::nonblocking::rpc_client::RpcClient;
 use solana_sdk::{
     commitment_config::CommitmentConfig,
     pubkey::Pubkey,
@@ -12,6 +12,18 @@ use serde::{Deserialize, Serialize};
 use solana_client::rpc_request::TokenAccountsFilter;
 use base64::engine::general_purpose::STANDARD as BASE64_STANDARD;
 use base64::Engine;
+use spl_token::instruction as token_instruction;
+use spl_token::id as spl_token_program_id;
+use spl_associated_token_account::get_associated_token_address;
+use spl_associated_token_account::instruction as ata_instruction;
+use mpl_token_metadata::instructions as mpl_instruction;
+use mpl_token_metadata::ID as TOKEN_METADATA_PROGRAM_ID;
+use solana_sdk::system_program;
+use solana_sdk::sysvar;
+use solana_program::program_pack::Pack;
+use mpl_token_metadata::accounts::{MasterEdition, Metadata};
+use mpl_token_metadata::instructions::CreateV1Builder;
+use mpl_token_metadata::types::PrintSupply;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct NftCreationCost {
@@ -76,15 +88,44 @@ pub struct SolanaClient {
 }
 
 impl SolanaClient {
-    pub fn new() -> Result<Self> {
-        // Підключаємося до Solana devnet
+    pub async fn new() -> Result<Self> {
+        // Підключаємося до Solana devnet з fallback
         let rpc_url = std::env::var("SOLANA_RPC_URL")
             .unwrap_or_else(|_| "https://api.devnet.solana.com".to_string());
         
-        let rpc_client = RpcClient::new_with_commitment(
-            rpc_url,
-            CommitmentConfig::confirmed(),
-        );
+        let rpc_url_alt = std::env::var("SOLANA_RPC_URL_ALT")
+            .unwrap_or_else(|_| "https://devnet.solana.rpcpool.com".to_string());
+        
+        // Спробуємо основний RPC URL, якщо не працює - використовуємо альтернативний
+        let rpc_client = {
+            let client = RpcClient::new_with_commitment(rpc_url.clone(), CommitmentConfig::confirmed());
+            match client.get_version().await {
+                Ok(version) => {
+                    log::info!("✅ Primary RPC URL working: {} (version: {:?})", rpc_url, version);
+                    client
+                },
+                Err(e) => {
+                    log::warn!("❌ Primary RPC URL failed: {} - Error: {}", rpc_url, e);
+                    log::info!("🔄 Trying alternative RPC URL: {}", rpc_url_alt);
+                    let alt_client = RpcClient::new_with_commitment(rpc_url_alt.clone(), CommitmentConfig::confirmed());
+                    match alt_client.get_version().await {
+                        Ok(version) => {
+                            log::info!("✅ Alternative RPC URL working: {} (version: {:?})", rpc_url_alt, version);
+                            alt_client
+                        },
+                        Err(e2) => {
+                            log::error!("❌ Both RPC URLs failed!");
+                            log::error!("Primary: {} - Error: {}", rpc_url, e);
+                            log::error!("Alternative: {} - Error: {}", rpc_url_alt, e2);
+                            return Err(anyhow::anyhow!("Failed to connect to any Solana RPC endpoint"));
+                        }
+                    }
+                }
+            }
+        };
+
+        // Налаштовуємо timeout для RPC з'єднань
+        log::info!("🔧 RPC client initialized with timeout settings");
 
         // Створюємо або завантажуємо keypair
         let keypair = Self::load_or_create_keypair()?;
@@ -107,13 +148,24 @@ impl SolanaClient {
         // Спробуємо завантажити keypair з файлу
         let keypair_path = std::env::var("KEYPAIR_PATH")
             .unwrap_or_else(|_| "keypair.json".to_string());
+        
+        log::info!("Trying to load keypair from: {}", keypair_path);
+        
+        // Перевіряємо, чи існує файл
+        if std::path::Path::new(&keypair_path).exists() {
+            log::info!("Keypair file exists: {}", keypair_path);
+        } else {
+            log::info!("Keypair file does not exist, will create: {}", keypair_path);
+        }
 
         match std::fs::read_to_string(&keypair_path) {
             Ok(keypair_data) => {
+                log::info!("Successfully read keypair from: {}", keypair_path);
                 let keypair_bytes: Vec<u8> = serde_json::from_str(&keypair_data)?;
                 Ok(Keypair::from_bytes(&keypair_bytes)?)
             }
-            Err(_) => {
+            Err(e) => {
+                log::warn!("Failed to read keypair from {}: {}", keypair_path, e);
                 // Якщо файл не існує, створюємо новий keypair
                 let new_keypair = Keypair::new();
                 let keypair_data = serde_json::to_string(&new_keypair.to_bytes().to_vec())?;
@@ -129,6 +181,15 @@ impl SolanaClient {
         // Використовуємо змінну середовища для шляху до файлу
         let treasury_keypair_path = std::env::var("TREASURY_KEYPAIR_PATH")
             .unwrap_or_else(|_| "treasury_keypair.json".to_string());
+        
+        log::info!("Trying to load treasury keypair from: {}", treasury_keypair_path);
+        
+        // Перевіряємо, чи існує файл
+        if std::path::Path::new(&treasury_keypair_path).exists() {
+            log::info!("Treasury keypair file exists: {}", treasury_keypair_path);
+        } else {
+            log::info!("Treasury keypair file does not exist, will create: {}", treasury_keypair_path);
+        }
 
         match std::fs::read_to_string(&treasury_keypair_path) {
             Ok(keypair_data) => {
@@ -136,7 +197,8 @@ impl SolanaClient {
                 log::info!("Treasury keypair loaded from: {}", treasury_keypair_path);
                 Ok(Keypair::from_bytes(&keypair_bytes)?)
             }
-            Err(_) => {
+            Err(e) => {
+                log::warn!("Failed to read treasury keypair from {}: {}", treasury_keypair_path, e);
                 // Якщо файл не існує, створюємо новий keypair
                 let new_keypair = Keypair::new();
                 let keypair_data = serde_json::to_string(&new_keypair.to_bytes().to_vec())?;
@@ -153,12 +215,12 @@ impl SolanaClient {
         Keypair::new()
     }
 
-    pub fn get_balance(&self, pubkey: &Pubkey) -> Result<u64> {
-        Ok(self.rpc_client.get_balance(pubkey)?)
+    pub async fn get_balance(&self, pubkey: &Pubkey) -> Result<u64> {
+        Ok(self.rpc_client.get_balance(pubkey).await?)
     }
 
-    pub fn get_account_info(&self, pubkey: &Pubkey) -> Result<Option<solana_sdk::account::Account>> {
-        Ok(self.rpc_client.get_account(pubkey).ok())
+    pub async fn get_account_info(&self, pubkey: &Pubkey) -> Result<Option<solana_sdk::account::Account>> {
+        Ok(self.rpc_client.get_account(pubkey).await.ok())
     }
 
     pub async fn create_account(
@@ -171,12 +233,12 @@ impl SolanaClient {
         let instruction = system_instruction::create_account(
             &payer.pubkey(),
             &new_account.pubkey(),
-            self.rpc_client.get_minimum_balance_for_rent_exemption(space)?,
+            self.rpc_client.get_minimum_balance_for_rent_exemption(space).await?,
             space as u64,
             program_id,
         );
 
-        let _recent_blockhash = self.rpc_client.get_latest_blockhash()?;
+        let _recent_blockhash = self.rpc_client.get_latest_blockhash().await?;
         let transaction = Transaction::new_signed_with_payer(
             &[instruction],
             Some(&payer.pubkey()),
@@ -184,7 +246,7 @@ impl SolanaClient {
             _recent_blockhash,
         );
 
-        let signature = self.rpc_client.send_and_confirm_transaction(&transaction)?;
+        let signature = self.rpc_client.send_and_confirm_transaction(&transaction).await?;
         Ok(signature.to_string())
     }
 
@@ -200,7 +262,7 @@ impl SolanaClient {
             amount,
         );
 
-        let _recent_blockhash = self.rpc_client.get_latest_blockhash()?;
+        let _recent_blockhash = self.rpc_client.get_latest_blockhash().await?;
         let transaction = Transaction::new_signed_with_payer(
             &[instruction],
             Some(&from.pubkey()),
@@ -208,35 +270,35 @@ impl SolanaClient {
             _recent_blockhash,
         );
 
-        let signature = self.rpc_client.send_and_confirm_transaction(&transaction)?;
+        let signature = self.rpc_client.send_and_confirm_transaction(&transaction).await?;
         Ok(signature.to_string())
     }
 
-    pub fn get_program_accounts(
+    pub async fn get_program_accounts(
         &self,
         program_id: &Pubkey,
     ) -> Result<Vec<(Pubkey, solana_sdk::account::Account)>> {
-        Ok(self.rpc_client.get_program_accounts(program_id)?)
+        Ok(self.rpc_client.get_program_accounts(program_id).await?)
     }
 
-    pub fn get_token_accounts_by_owner(
+    pub async fn get_token_accounts_by_owner(
         &self,
         owner: &Pubkey,
     ) -> Result<Vec<solana_client::rpc_response::RpcKeyedAccount>> {
         Ok(self.rpc_client.get_token_accounts_by_owner(
             owner,
             TokenAccountsFilter::ProgramId(spl_token::id()),
-        )?)
+        ).await?)
     }
 
-    pub fn get_nft_accounts_by_owner(
+    pub async fn get_nft_accounts_by_owner(
         &self,
         owner: &Pubkey,
     ) -> Result<Vec<solana_client::rpc_response::RpcKeyedAccount>> {
         Ok(self.rpc_client.get_token_accounts_by_owner(
             owner,
             TokenAccountsFilter::ProgramId(spl_token::id()),
-        )?)
+        ).await?)
     }
 
     pub fn get_network() -> &'static str {
@@ -253,9 +315,9 @@ impl SolanaClient {
 
     // Розрахунок комісій для створення NFT
     pub async fn calculate_nft_creation_cost(&self) -> Result<NftCreationCost> {
-        let rent = self.rpc_client.get_minimum_balance_for_rent_exemption(82)?; // Mint account size
-        let token_account_cost = self.rpc_client.get_minimum_balance_for_rent_exemption(165)?; // Token account size
-        let metadata_account_cost = self.rpc_client.get_minimum_balance_for_rent_exemption(679)?; // Metadata account size
+        let rent = self.rpc_client.get_minimum_balance_for_rent_exemption(82).await?; // Mint account size
+        let token_account_cost = self.rpc_client.get_minimum_balance_for_rent_exemption(165).await?; // Token account size
+        let metadata_account_cost = self.rpc_client.get_minimum_balance_for_rent_exemption(679).await?; // Metadata account size
         let transaction_fee = 5000; // Base transaction fee
         
         let total_cost = rent + token_account_cost + metadata_account_cost + transaction_fee;
@@ -280,9 +342,9 @@ impl SolanaClient {
 
     // Розрахунок комісій для створення колекції
     pub async fn calculate_collection_creation_cost(&self) -> Result<NftCreationCost> {
-        let rent = self.rpc_client.get_minimum_balance_for_rent_exemption(82)?; // Mint account size
-        let token_account_cost = self.rpc_client.get_minimum_balance_for_rent_exemption(165)?; // Token account size
-        let metadata_account_cost = self.rpc_client.get_minimum_balance_for_rent_exemption(679)?; // Metadata account size
+        let rent = self.rpc_client.get_minimum_balance_for_rent_exemption(82).await?; // Mint account size
+        let token_account_cost = self.rpc_client.get_minimum_balance_for_rent_exemption(165).await?; // Token account size
+        let metadata_account_cost = self.rpc_client.get_minimum_balance_for_rent_exemption(679).await?; // Metadata account size
         let transaction_fee = 5000; // Base transaction fee
         
         let total_cost = rent + token_account_cost + metadata_account_cost + transaction_fee;
@@ -318,7 +380,7 @@ impl SolanaClient {
         instructions: Vec<solana_sdk::instruction::Instruction>,
         fee_payer: &Pubkey,
     ) -> Result<String> {
-        let _recent_blockhash = self.rpc_client.get_latest_blockhash()?;
+        let _recent_blockhash = self.rpc_client.get_latest_blockhash().await?;
         
         let message = Message::new(
             &instructions,
@@ -337,47 +399,102 @@ impl SolanaClient {
         let decoded = BASE64_STANDARD.decode(signed_transaction_base64)?;
         let transaction: Transaction = bincode::deserialize(&decoded)?;
         
-        let signature = self.rpc_client.send_and_confirm_transaction(&transaction)?;
+        let signature = self.rpc_client.send_and_confirm_transaction(&transaction).await?;
         Ok(signature.to_string())
     }
 
     // Створення інструкцій для NFT
     pub async fn create_nft_instructions(
         &self,
-        _metadata_uri: &str,
-        _name: &str,
-        _symbol: &str,
+        metadata_uri: &str,
+        name: &str,
+        symbol: &str,
         fee_payer: &Pubkey,
+        mint_pubkey: &Pubkey,
     ) -> Result<Vec<solana_sdk::instruction::Instruction>> {
-        // Тут буде логіка створення інструкцій для NFT через Metaplex
-        // Поки що повертаємо заглушку з реальними комісіями
-        
-        // Розрахунок комісій для NFT
-        let rent_exemption_amount = self.rpc_client.get_minimum_balance_for_rent_exemption(82)?; // Mint account size
-        let token_account_rent = self.rpc_client.get_minimum_balance_for_rent_exemption(165)?; // Token account size
-        let metadata_rent = self.rpc_client.get_minimum_balance_for_rent_exemption(679)?; // Metadata account size
-        
-        log::info!("NFT creation costs:");
-        log::info!("  Mint Account: {} lamports ({:.6} SOL)", rent_exemption_amount, rent_exemption_amount as f64 / 1_000_000_000.0);
-        log::info!("  Token Account: {} lamports ({:.6} SOL)", token_account_rent, token_account_rent as f64 / 1_000_000_000.0);
-        log::info!("  Metadata Account: {} lamports ({:.6} SOL)", metadata_rent, metadata_rent as f64 / 1_000_000_000.0);
-        log::info!("  Transaction Fee: 5000 lamports (0.000005 SOL)");
-        
-        let total_cost = rent_exemption_amount + token_account_rent + metadata_rent + 5000;
-        log::info!("  Total Cost: {} lamports ({:.6} SOL)", total_cost, total_cost as f64 / 1_000_000_000.0);
-        
-        // Створюємо реальні інструкції для NFT
-        let instructions = vec![
-            // Тут будуть реальні інструкції Metaplex для створення NFT
-            // Поки що повертаємо dummy інструкцію
-            system_instruction::transfer(
-                fee_payer,
-                fee_payer, // dummy transfer
-                1000, // 0.001 SOL
-            ),
-        ];
-        
-        Ok(instructions)
+        // 1. Створення mint account
+        let mint_rent = self.rpc_client.get_minimum_balance_for_rent_exemption(spl_token::state::Mint::get_packed_len()).await?;
+        let create_mint_ix = system_instruction::create_account(
+            fee_payer,
+            mint_pubkey,
+            mint_rent,
+            spl_token::state::Mint::get_packed_len() as u64,
+            &spl_token_program_id(),
+        );
+
+        // 2. Initialize mint
+        let init_mint_ix = token_instruction::initialize_mint(
+            &spl_token_program_id(),
+            mint_pubkey,
+            fee_payer, // mint authority
+            Some(fee_payer), // freeze authority
+            0, // decimals
+        )?;
+
+        // 3. Create ATA for user
+        let ata = get_associated_token_address(fee_payer, mint_pubkey);
+        let create_ata_ix = ata_instruction::create_associated_token_account(
+            fee_payer,
+            fee_payer,
+            mint_pubkey,
+            &spl_token_program_id(),
+        );
+
+        // 4. Mint 1 token to ATA
+        let mint_to_ix = token_instruction::mint_to(
+            &spl_token_program_id(),
+            mint_pubkey,
+            &ata,
+            fee_payer,
+            &[],
+            1,
+        )?;
+
+        // 5. Create Metadata & MasterEdition via Metaplex (новий API)
+        let metadata_address = Metadata::find_pda(mint_pubkey).0;
+        let master_edition_address = MasterEdition::find_pda(mint_pubkey).0;
+        let create_nft_ix = CreateV1Builder::new()
+            .metadata(metadata_address)
+            .master_edition(Some(master_edition_address))
+            .mint(*mint_pubkey, true)
+            .authority(*fee_payer)
+            .payer(*fee_payer)
+            .update_authority(*fee_payer, true)
+            .spl_token_program(Some(spl_token_program_id()))
+            .name(name.to_string())
+            .symbol(symbol.to_string())
+            .uri(metadata_uri.to_string())
+            .seller_fee_basis_points(500)
+            .is_mutable(true)
+            .print_supply(PrintSupply::Zero)
+            .instruction();
+
+        Ok(vec![
+            create_mint_ix,
+            init_mint_ix,
+            create_ata_ix,
+            mint_to_ix,
+            create_nft_ix,
+        ])
+    }
+
+    pub async fn create_nft_transaction_with_mint(
+        &self,
+        instructions: Vec<solana_sdk::instruction::Instruction>,
+        fee_payer: &Pubkey,
+        mint_keypair: &Keypair,
+    ) -> Result<String> {
+        let _recent_blockhash = self.rpc_client.get_latest_blockhash().await?;
+        let message = Message::new(
+            &instructions,
+            Some(fee_payer),
+        );
+        let mut transaction = Transaction::new_unsigned(message);
+        // Додаємо mint keypair як required signer (але не підписуємо тут)
+        transaction.partial_sign(&[mint_keypair], _recent_blockhash);
+        let serialized = bincode::serialize(&transaction)?;
+        let encoded = BASE64_STANDARD.encode(serialized);
+        Ok(encoded)
     }
 
     // Створення інструкцій для колекції
@@ -403,18 +520,34 @@ impl SolanaClient {
 
     // Отримання інформації про treasury
     pub async fn get_treasury_info(&self) -> Result<TreasuryWallet> {
-        let balance = self.rpc_client.get_balance(&self.treasury_address)?;
+        log::info!("Getting treasury info for address: {}", self.treasury_address);
+        
+        // Спробуємо отримати баланс з обробкою помилок
+        let balance = match self.rpc_client.get_balance(&self.treasury_address).await {
+            Ok(bal) => {
+                log::info!("Treasury balance: {} lamports ({:.6} SOL)", bal, bal as f64 / 1_000_000_000.0);
+                bal
+            },
+            Err(e) => {
+                log::warn!("Failed to get treasury balance: {}", e);
+                // Якщо не можемо отримати баланс, повертаємо 0
+                0
+            }
+        };
         
         // В реальному додатку тут буде підрахунок total_collected_fees з бази даних
         let total_collected_fees = 0; // Placeholder
         
-        Ok(TreasuryWallet {
+        let treasury_info = TreasuryWallet {
             treasury_address: self.treasury_address.to_string(),
             balance,
             total_collected_fees,
             owner_address: std::env::var("FEE_RECIPIENT")
                 .unwrap_or_else(|_| "your-wallet-address-here".to_string()),
-        })
+        };
+        
+        log::info!("Treasury info created successfully: {:?}", treasury_info);
+        Ok(treasury_info)
     }
     
     // Створення інструкцій для NFT з fee transfer
@@ -427,9 +560,9 @@ impl SolanaClient {
         service_fee: u64,
     ) -> Result<Vec<solana_sdk::instruction::Instruction>> {
         // Розрахунок комісій для NFT
-        let rent_exemption_amount = self.rpc_client.get_minimum_balance_for_rent_exemption(82)?;
-        let token_account_rent = self.rpc_client.get_minimum_balance_for_rent_exemption(165)?;
-        let metadata_rent = self.rpc_client.get_minimum_balance_for_rent_exemption(679)?;
+        let rent_exemption_amount = self.rpc_client.get_minimum_balance_for_rent_exemption(82).await?;
+        let token_account_rent = self.rpc_client.get_minimum_balance_for_rent_exemption(165).await?;
+        let metadata_rent = self.rpc_client.get_minimum_balance_for_rent_exemption(679).await?;
         
         log::info!("NFT creation costs:");
         log::info!("  Mint Account: {} lamports ({:.6} SOL)", rent_exemption_amount, rent_exemption_amount as f64 / 1_000_000_000.0);
@@ -475,7 +608,7 @@ impl SolanaClient {
         _owner_signature: &str, // Підпис власника для підтвердження
     ) -> Result<String> {
         // Перевіряємо, чи достатньо коштів
-        let balance = self.rpc_client.get_balance(&self.treasury_address)?;
+        let balance = self.rpc_client.get_balance(&self.treasury_address).await?;
         if balance < amount {
             return Err(anyhow!("Insufficient treasury balance: {} < {}", balance, amount));
         }
@@ -491,7 +624,7 @@ impl SolanaClient {
             amount,
         );
         
-        let _recent_blockhash = self.rpc_client.get_latest_blockhash()?;
+        let _recent_blockhash = self.rpc_client.get_latest_blockhash().await?;
         let mut transaction = Transaction::new_with_payer(
             &[withdraw_ix],
             Some(&self.treasury_address),
@@ -502,7 +635,7 @@ impl SolanaClient {
         transaction.sign(&[&self.treasury_keypair], transaction.message.hash());
         
         // Відправляємо транзакцію
-        let signature = self.rpc_client.send_and_confirm_transaction(&transaction)?;
+        let signature = self.rpc_client.send_and_confirm_transaction(&transaction).await?;
         
         log::info!("Treasury withdrawal successful: {}", signature);
         Ok(signature.to_string())
@@ -510,7 +643,7 @@ impl SolanaClient {
     
     // Отримання балансу treasury
     pub async fn get_treasury_balance(&self) -> Result<u64> {
-        let balance = self.rpc_client.get_balance(&self.treasury_address)?;
+        let balance = self.rpc_client.get_balance(&self.treasury_address).await?;
         Ok(balance)
     }
 } 

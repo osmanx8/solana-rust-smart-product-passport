@@ -221,7 +221,7 @@ impl NftService {
         _wallet_address: &str,
         _image_data: Option<&str>,
         _collection_image_data: Option<&str>,
-    ) -> Result<String, anyhow::Error> {
+    ) -> Result<(String, String), anyhow::Error> { // (transaction, mint_address)
         // 1. Завантажуємо зображення (якщо надано)
         let mut image_uri = "https://arweave.net/placeholder-image".to_string();
         if let Some(img_data) = _image_data {
@@ -245,19 +245,23 @@ impl NftService {
         // 3. Завантажуємо метадані
         let metadata_uri = self.upload_service.upload_metadata(&metadata).await?;
 
-        // 4. Створюємо інструкції для транзакції
+        // 4. Генеруємо mint keypair
+        let mint_keypair = self.solana_client.generate_keypair();
+        let mint_pubkey = mint_keypair.pubkey();
+
+        // 5. Створюємо інструкції для транзакції
         let fee_payer = Pubkey::from_str(_wallet_address)?;
         let instructions = self.solana_client
-            .create_nft_instructions(&metadata_uri, &metadata.name, &metadata.symbol, &fee_payer)
+            .create_nft_instructions(&metadata_uri, &metadata.name, &metadata.symbol, &fee_payer, &mint_pubkey)
             .await?;
 
-        // 5. Створюємо транзакцію для підпису
+        // 6. Створюємо транзакцію для підпису
         let transaction_data = self.solana_client
-            .create_nft_transaction(instructions, &fee_payer)
+            .create_nft_transaction_with_mint(instructions, &fee_payer, &mint_keypair)
             .await?;
 
-        log::info!("Created NFT transaction for wallet: {}", _wallet_address);
+        log::info!("Created NFT transaction for wallet: {} mint: {}", _wallet_address, mint_pubkey);
         
-        Ok(transaction_data)
+        Ok((transaction_data, mint_pubkey.to_string()))
     }
 } 

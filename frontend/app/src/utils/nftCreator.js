@@ -4,6 +4,7 @@
  */
 
 import { formatNftMetadata } from './nftUtils';
+import { Transaction } from '@solana/web3.js';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8080';
 
@@ -141,7 +142,10 @@ export async function mintPassportWithMetaplex(wallet, file, formData, collectio
     const submitNftData = await submitNftResponse.json();
     console.log('NFT created successfully:', submitNftData);
     
-    return submitNftData.signature;
+    return {
+      signature: submitNftData.signature,
+      mintAddress: nftTransactionData.mint_address,
+    };
   } catch (error) {
     console.error('Error in mintPassportWithMetaplex:', error);
     throw error;
@@ -164,15 +168,17 @@ async function fileToBase64(file) {
 // Функція для підпису транзакції в гаманці
 async function signTransaction(wallet, transactionBase64) {
   try {
-    // Декодуємо транзакцію
-    const transactionBytes = Uint8Array.from(atob(transactionBase64), c => c.charCodeAt(0));
-    
-    // Підписуємо транзакцію
-    const signedTransaction = await wallet.signTransaction(transactionBytes);
-    
-    // Кодуємо підписану транзакцію назад в base64
-    const signedTransactionBase64 = btoa(String.fromCharCode(...signedTransaction));
-    
+    const transactionBuffer = Buffer.from(transactionBase64, 'base64');
+    const transaction = Transaction.from(transactionBuffer);
+
+    // Отримуємо актуальний blockhash з бекенду
+    const res = await fetch(`${BACKEND_URL}/api/latest-blockhash`);
+    const data = await res.json();
+    if (!data.success) throw new Error('Failed to fetch latest blockhash');
+    transaction.recentBlockhash = data.blockhash;
+
+    const signedTransaction = await wallet.signTransaction(transaction);
+    const signedTransactionBase64 = Buffer.from(signedTransaction.serialize()).toString('base64');
     return signedTransactionBase64;
   } catch (error) {
     console.error('Error signing transaction:', error);

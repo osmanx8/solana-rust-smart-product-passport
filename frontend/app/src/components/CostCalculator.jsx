@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { getNftCreationCost, getCollectionCreationCost } from '../utils/nftCreator';
+import { useTranslation } from 'react-i18next';
 
 const CostCalculator = () => {
+  const { t } = useTranslation();
   const [nftCost, setNftCost] = useState(null);
   const [collectionCost, setCollectionCost] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -89,14 +91,14 @@ const CostCalculator = () => {
           <svg className="w-5 h-5 text-purple-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
           </svg>
-          Комісія за створення NFT
+          {t('mint_fee')}
         </h3>
         
         {nftCost && (
           <div className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="bg-gray-50 rounded-lg p-4">
-                <div className="text-sm text-gray-600 mb-1">Загальна вартість (без fee)</div>
+                <div className="text-sm text-gray-600 mb-1">{t('total_cost_without_fee')}</div>
                 <div className="text-2xl font-bold text-gray-900">
                   {formatSol(nftCost.total_cost)} SOL
                 </div>
@@ -105,7 +107,7 @@ const CostCalculator = () => {
                 </div>
               </div>
               <div className="bg-gray-50 rounded-lg p-4">
-                <div className="text-sm text-gray-600 mb-1">Сервісний fee (20%)</div>
+                <div className="text-sm text-gray-600 mb-1">{t('service_fee')} (20%)</div>
                 <div className="text-xl font-semibold text-gray-900">
                   {formatSol(nftCost.service_fee)} SOL
                 </div>
@@ -114,7 +116,7 @@ const CostCalculator = () => {
                 </div>
               </div>
               <div className="bg-gray-50 rounded-lg p-4 col-span-2">
-                <div className="text-sm text-gray-600 mb-1">Загальна сума до сплати</div>
+                <div className="text-sm text-gray-600 mb-1">{t('total_fee')}</div>
                 <div className="text-2xl font-bold text-green-700">
                   {formatSol(nftCost.total_with_fee)} SOL
                 </div>
@@ -125,22 +127,22 @@ const CostCalculator = () => {
             </div>
 
             <div className="border-t pt-4">
-              <h4 className="text-sm font-medium text-gray-700 mb-3">Детальний розбір комісій:</h4>
+              <h4 className="text-sm font-medium text-gray-700 mb-3">{t('fee_breakdown')}</h4>
               <div className="space-y-2">
                 <div className="flex justify-between text-sm">
-                  <span className="text-gray-600">Mint Account (рахунок токена):</span>
+                  <span className="text-gray-600">{t('mint_account_fee')}</span>
                   <span className="font-medium">{formatSol(nftCost.mint_account)} SOL</span>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span className="text-gray-600">Token Account (рахунок балансу):</span>
+                  <span className="text-gray-600">{t('token_account_fee')}</span>
                   <span className="font-medium">{formatSol(nftCost.token_account)} SOL</span>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span className="text-gray-600">Metadata Account (метадані):</span>
+                  <span className="text-gray-600">{t('metadata_account_fee')}</span>
                   <span className="font-medium">{formatSol(nftCost.metadata_account)} SOL</span>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span className="text-gray-600">Транзакційна комісія:</span>
+                  <span className="text-gray-600">{t('transaction_fee')}</span>
                   <span className="font-medium">{formatSol(nftCost.transaction_fee)} SOL</span>
                 </div>
               </div>
@@ -155,14 +157,14 @@ const CostCalculator = () => {
           <svg className="w-5 h-5 text-blue-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
           </svg>
-          Комісія за створення колекції
+          {t('collection_creation_fee')}
         </h3>
         
         {collectionCost && (
           <div className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="bg-gray-50 rounded-lg p-4">
-                <div className="text-sm text-gray-600 mb-1">Загальна вартість (без fee)</div>
+                <div className="text-sm text-gray-600 mb-1">{t('total_cost_without_fee')}</div>
                 <div className="text-2xl font-bold text-gray-900">
                   {formatSol(collectionCost.total_cost)} SOL
                 </div>
@@ -171,7 +173,7 @@ const CostCalculator = () => {
                 </div>
               </div>
               <div className="bg-gray-50 rounded-lg p-4">
-                <div className="text-sm text-gray-600 mb-1">Сервісний fee (20%)</div>
+                <div className="text-sm text-gray-600 mb-1">{t('service_fee')} (20%)</div>
                 <div className="text-xl font-semibold text-gray-900">
                   {formatSol(collectionCost.service_fee)} SOL
                 </div>
@@ -180,7 +182,7 @@ const CostCalculator = () => {
                 </div>
               </div>
               <div className="bg-gray-50 rounded-lg p-4 col-span-2">
-                <div className="text-sm text-gray-600 mb-1">Загальна сума до сплати</div>
+                <div className="text-sm text-gray-600 mb-1">{t('total_fee')}</div>
                 <div className="text-2xl font-bold text-green-700">
                   {formatSol(collectionCost.total_with_fee)} SOL
                 </div>
@@ -191,22 +193,22 @@ const CostCalculator = () => {
             </div>
 
             <div className="border-t pt-4">
-              <h4 className="text-sm font-medium text-gray-700 mb-3">Детальний розбір комісій:</h4>
+              <h4 className="text-sm font-medium text-gray-700 mb-3">{t('fee_breakdown')}</h4>
               <div className="space-y-2">
                 <div className="flex justify-between text-sm">
-                  <span className="text-gray-600">Mint Account (рахунок токена):</span>
+                  <span className="text-gray-600">{t('mint_account_fee')}</span>
                   <span className="font-medium">{formatSol(collectionCost.mint_account)} SOL</span>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span className="text-gray-600">Token Account (рахунок балансу):</span>
+                  <span className="text-gray-600">{t('token_account_fee')}</span>
                   <span className="font-medium">{formatSol(collectionCost.token_account)} SOL</span>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span className="text-gray-600">Metadata Account (метадані):</span>
+                  <span className="text-gray-600">{t('metadata_account_fee')}</span>
                   <span className="font-medium">{formatSol(collectionCost.metadata_account)} SOL</span>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span className="text-gray-600">Транзакційна комісія:</span>
+                  <span className="text-gray-600">{t('transaction_fee')}</span>
                   <span className="font-medium">{formatSol(collectionCost.transaction_fee)} SOL</span>
                 </div>
               </div>

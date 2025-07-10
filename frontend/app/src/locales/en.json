@@ -117,5 +117,20 @@
   "collection_automotive": "Automotive",
   "collection_healthcare": "Healthcare",
   "collection_food": "Food & Beverage",
-  "collection_other": "Other"
+  "collection_other": "Other",
+  "service_fee": "Service fee",
+  "mint_fee": "Minting fee",
+  "transaction_fee": "Transaction fee",
+  "total_fee": "Total fee",
+  "fee_description": "This fee covers blockchain transaction costs and service expenses.",
+  "fee_percent": "Fee (%)",
+  "fee_amount": "Fee amount",
+  "fee_included": "Fee included",
+  "fee_not_included": "Fee not included",
+  "total_cost_without_fee": "Total cost (without fee)",
+  "fee_breakdown": "Fee breakdown:",
+  "mint_account_fee": "Mint Account (token account)",
+  "token_account_fee": "Token Account (balance account)",
+  "metadata_account_fee": "Metadata Account (metadata)",
+  "collection_creation_fee": "Collection creation fee"
 } 

@@ -106,5 +106,20 @@
   "collection_automotive": "Автомобільна промисловість",
   "collection_healthcare": "Охорона здоров'я",
   "collection_food": "Продукти харчування",
-  "collection_other": "Інше"
+  "collection_other": "Інше",
+  "service_fee": "Сервісна комісія",
+  "mint_fee": "Комісія за випуск NFT",
+  "transaction_fee": "Транзакційна комісія",
+  "total_fee": "Загальна комісія",
+  "fee_description": "Ця комісія покриває витрати на блокчейн-транзакції та сервісні послуги.",
+  "fee_percent": "Комісія (%)",
+  "fee_amount": "Сума комісії",
+  "fee_included": "Комісія включена",
+  "fee_not_included": "Комісія не включена",
+  "total_cost_without_fee": "Загальна вартість (без комісії)",
+  "fee_breakdown": "Детальний розбір комісій:",
+  "mint_account_fee": "Mint Account (рахунок токена)",
+  "token_account_fee": "Token Account (рахунок балансу)",
+  "metadata_account_fee": "Metadata Account (метадані)",
+  "collection_creation_fee": "Комісія за створення колекції"
 } 

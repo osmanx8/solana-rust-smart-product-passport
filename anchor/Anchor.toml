@@ -6,7 +6,7 @@ resolution = true
 skip-lint = false
 
 [programs.devnet]
-smart_passport = "8tdpknetCPXv5Ztk8yoJWceRCgCxp3T6U56TnUGk99t4"
+smart-passport = "8tdpknetCPXv5Ztk8yoJWceRCgCxp3T6U56TnUGk99t4"
 
 [build]
 docker = true

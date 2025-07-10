@@ -2,7 +2,6 @@ use anyhow::{Result, anyhow};
 use reqwest::Client;
 use serde::{Deserialize, Serialize};
 use reqwest::header::{HeaderMap, HeaderName, HeaderValue};
-
 pub struct UploadService {
     client: Client,
     bundlr_url: String,
@@ -20,37 +19,21 @@ impl UploadService {
     }
 
     pub async fn upload_image(&self, image_data: &[u8], filename: &str) -> Result<String> {
-        // Тут буде логіка завантаження зображення на Arweave через Bundlr
-        // Поки що повертаємо заглушку
-        
+        // Повертаю попередню логіку (наприклад, заглушка або Bundlr)
         log::info!("Uploading image: {} ({} bytes)", filename, image_data.len());
-        
-        // Симулюємо завантаження
         tokio::time::sleep(tokio::time::Duration::from_millis(100)).await;
-        
-        // Повертаємо заглушку URI
         let image_uri = format!("https://arweave.net/mock-image-{}", filename);
-        
         log::info!("Image uploaded successfully: {}", image_uri);
-        
         Ok(image_uri)
     }
 
     pub async fn upload_metadata<T: Serialize>(&self, metadata: &T) -> Result<String> {
-        // Тут буде логіка завантаження metadata на Arweave через Bundlr
-        // Поки що повертаємо заглушку
-        
+        // Повертаю попередню логіку (наприклад, заглушка або Bundlr)
         let metadata_json = serde_json::to_string(metadata)?;
         log::info!("Uploading metadata: {} bytes", metadata_json.len());
-        
-        // Симулюємо завантаження
         tokio::time::sleep(tokio::time::Duration::from_millis(100)).await;
-        
-        // Повертаємо заглушку URI
         let metadata_uri = "https://arweave.net/mock-metadata-json".to_string();
-        
         log::info!("Metadata uploaded successfully: {}", metadata_uri);
-        
         Ok(metadata_uri)
     }
 

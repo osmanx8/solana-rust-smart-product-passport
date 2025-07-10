@@ -31,6 +31,7 @@ const CreateNFTPage = ({
   const [qrCodeUrl, setQrCodeUrl] = useState(null);
   const [localStatus, setLocalStatus] = useState('');
   const [collectionImagePreview, setCollectionImagePreview] = useState(null);
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     if (nftAddress) {
@@ -423,40 +424,37 @@ const CreateNFTPage = ({
               </motion.button>
             </form>
           ) : (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="text-center"
-            >
-              <h2 className="text-2xl font-bold text-white mb-6">NFT Product Passport Created!</h2>
-
-              <div className="bg-gray-700/30 p-6 rounded-xl mb-6">
-                <QRCode
-                  value={qrCodeUrl}
-                  size={256}
-                  level="H"
-                  includeMargin={true}
-                  className="mx-auto mb-4"
-                />
-                <p className="text-gray-300 mb-4">Scan this QR code to view the NFT product passport</p>
+            <div className="mt-8 text-center">
+              <h2 className="text-xl font-bold text-green-400 mb-4">NFT Passport created successfully!</h2>
+              <div className="text-gray-200 mb-2">NFT Mint Address:</div>
+              <div className="flex flex-col items-center gap-2">
+                <div className="text-lg font-mono text-blue-400 break-all">{nftAddress}</div>
+                <button
+                  className={`mt-2 px-4 py-1 rounded bg-gray-700 hover:bg-gray-600 text-sm text-white border border-gray-500 transition-colors ${copied ? 'bg-green-600 border-green-700' : ''}`}
+                  onClick={() => {
+                    navigator.clipboard.writeText(nftAddress);
+                    setCopied(true);
+                    setTimeout(() => setCopied(false), 1500);
+                  }}
+                >
+                  {copied ? 'Copied!' : 'Copy Address'}
+                </button>
                 <a
-                  href={qrCodeUrl}
+                  href={`https://explorer.solana.com/address/${nftAddress}?cluster=devnet`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-blue-400 hover:text-blue-300 transition-colors"
+                  className="mt-2 text-blue-400 hover:text-blue-300 underline text-sm"
                 >
                   View on Solana Explorer
                 </a>
               </div>
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
+              <button
+                className="mt-6 px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold transition-colors"
                 onClick={clearNftAddress}
-                className="px-6 py-3 rounded-lg bg-gradient-to-r from-blue-500 to-purple-500 text-white font-medium hover:shadow-lg hover:shadow-blue-500/25 transition-all"
               >
-                Create Another NFT Passport
-              </motion.button>
-            </motion.div>
+                Create Another NFT
+              </button>
+            </div>
           )}
 
           {(status || localStatus) && (

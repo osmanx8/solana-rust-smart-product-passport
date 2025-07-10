@@ -903,9 +903,9 @@ const App = () => {
       if (!walletAddress || !window.solana) {
         throw new Error('Please connect your wallet first');
       }
-      const address = await mintPassportWithMetaplex(window.solana, file, formData, collectionImage);
+      const { signature, mintAddress } = await mintPassportWithMetaplex(window.solana, file, formData, collectionImage);
       setStatus('NFT Passport created successfully!');
-      setCreatedNftAddress(address);
+      setCreatedNftAddress(mintAddress);
       setFormData({
         serialNumber: '',
         productionDate: '',
@@ -919,7 +919,7 @@ const App = () => {
       setFile(null);
       setCollectionImage(null);
       await fetchPassports();
-      return address;
+      return mintAddress;
     } catch (error) {
       setStatus(`Error creating NFT passport: ${error.message}`);
       throw error;

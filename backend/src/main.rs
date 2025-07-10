@@ -9,15 +9,15 @@ use bincode;
 use base64::engine::general_purpose::STANDARD as BASE64_STANDARD;
 use base64::Engine;
 use std::str::FromStr;
-
+use tokio;
+use std::thread;
+use solana_client::SolanaClient;
 mod nft_service;
 mod collection_service;
 mod solana_client;
 mod upload_service;
-
 use nft_service::NftService;
 use collection_service::CollectionService;
-use solana_client::SolanaClient;
 use upload_service::UploadService;
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -95,12 +95,34 @@ pub struct AppState {
     pub upload_service: Arc<UploadService>,
 }
 
-#[actix_web::main]
-async fn main() -> std::io::Result<()> {
+// Видаляємо #[actix_web::main] і створюємо власну main функцію
+fn main() -> std::io::Result<()> {
+    let num_workers = thread::available_parallelism()
+        .map(|n| n.get())
+        .unwrap_or(4);
+
+    println!("Starting server with {} workers", num_workers);
+
+    // Створюємо multi-threaded runtime з явними налаштуваннями
+    let rt = tokio::runtime::Builder::new_multi_thread()
+        .worker_threads(num_workers)
+        .enable_all()
+        .build()
+        .unwrap();
+    rt.block_on(async_main(num_workers))
+}
+
+async fn async_main(num_workers: usize) -> std::io::Result<()> {
     env_logger::init();
     
-    // Ініціалізуємо сервіси
-    let solana_client = Arc::new(SolanaClient::new().expect("Failed to initialize Solana client"));
+    // Завантажуємо змінні середовища з файлу
+    dotenv::from_filename("env.local").ok();
+    
+    // Ініціалізуємо сервіси в main thread (multi-threaded runtime)
+    println!("Initializing Solana client...");
+    let solana_client = Arc::new(SolanaClient::new().await.expect("Failed to initialize Solana client"));
+    println!("Solana client initialized successfully!");
+    
     let upload_service = Arc::new(UploadService::new().expect("Failed to initialize upload service"));
     let nft_service = Arc::new(NftService::new(
         Arc::clone(&solana_client),
@@ -146,11 +168,27 @@ async fn main() -> std::io::Result<()> {
                     .route("/get-collection-cost", web::get().to(get_collection_cost))
                     .route("/treasury/info", web::get().to(get_treasury_info))
                     .route("/treasury/withdraw", web::post().to(withdraw_from_treasury))
+                    .service(latest_blockhash)
             )
     })
+    .workers(num_workers)
     .bind("0.0.0.0:8080")?
     .run()
     .await
+}
+
+#[actix_web::get("/latest-blockhash")]
+async fn latest_blockhash(_state: web::Data<AppState>) -> Result<HttpResponse, Error> {
+    match _state.solana_client.rpc_client.get_latest_blockhash().await {
+        Ok(hash) => Ok(HttpResponse::Ok().json(serde_json::json!({
+            "success": true,
+            "blockhash": hash.to_string()
+        }))),
+        Err(e) => Ok(HttpResponse::InternalServerError().json(serde_json::json!({
+            "success": false,
+            "error": format!("{}", e)
+        }))),
+    }
 }
 
 async fn health_check() -> HttpResponse {
@@ -178,56 +216,65 @@ async fn create_nft_transaction(
     _state: web::Data<AppState>,
     _payload: web::Json<serde_json::Value>,
 ) -> Result<HttpResponse, Error> {
-    let metadata_uri = _payload["metadata_uri"]
-        .as_str()
-        .ok_or_else(|| actix_web::error::ErrorBadRequest("Metadata URI is required"))?;
-    
-    let name = _payload["name"]
-        .as_str()
-        .ok_or_else(|| actix_web::error::ErrorBadRequest("Name is required"))?;
-    
-    let symbol = _payload["symbol"]
-        .as_str()
-        .ok_or_else(|| actix_web::error::ErrorBadRequest("Symbol is required"))?;
-    
-    let fee_payer = _payload["fee_payer"]
-        .as_str()
-        .ok_or_else(|| actix_web::error::ErrorBadRequest("Fee payer is required"))?;
-    
-    let fee_payer_pubkey = Pubkey::from_str(fee_payer)
-        .map_err(|e| actix_web::error::ErrorBadRequest(format!("Invalid fee payer address: {}", e)))?;
-    
-    // Розраховуємо service fee
-    let cost = _state.solana_client.calculate_nft_creation_cost().await.map_err(actix_web::error::ErrorInternalServerError)?;
-    let service_fee = cost.service_fee;
-    
-    // Створюємо інструкції з fee transfer
-    let instructions = _state.solana_client.create_nft_instructions_with_fee(
-        metadata_uri,
-        name,
-        symbol,
-        &fee_payer_pubkey,
-        service_fee,
-    ).await.map_err(actix_web::error::ErrorInternalServerError)?;
-    
-    // Створюємо транзакцію
-    let recent_blockhash = _state.solana_client.as_ref().rpc_client.get_latest_blockhash().map_err(actix_web::error::ErrorInternalServerError)?;
-    let mut transaction = Transaction::new_with_payer(
-        &instructions,
-        Some(&fee_payer_pubkey),
-    );
-    transaction.message.recent_blockhash = recent_blockhash;
-    
-    // Серіалізуємо транзакцію
-    let serialized = bincode::serialize(&transaction).map_err(actix_web::error::ErrorInternalServerError)?;
-    let encoded = BASE64_STANDARD.encode(serialized);
-    
+    // Витягуємо всі потрібні поля з payload
+    let serial_number = match _payload["serial_number"].as_str() {
+        Some(val) => val,
+        None => return Ok(HttpResponse::BadRequest().json(serde_json::json!({"success": false, "error": "serial_number is required"}))),
+    };
+    let production_date = match _payload["production_date"].as_str() {
+        Some(val) => val,
+        None => return Ok(HttpResponse::BadRequest().json(serde_json::json!({"success": false, "error": "production_date is required"}))),
+    };
+    let device_model = match _payload["device_model"].as_str() {
+        Some(val) => val,
+        None => return Ok(HttpResponse::BadRequest().json(serde_json::json!({"success": false, "error": "device_model is required"}))),
+    };
+    let warranty_period = match _payload["warranty_period"].as_str() {
+        Some(val) => val,
+        None => return Ok(HttpResponse::BadRequest().json(serde_json::json!({"success": false, "error": "warranty_period is required"}))),
+    };
+    let country_of_origin = match _payload["country_of_origin"].as_str() {
+        Some(val) => val,
+        None => return Ok(HttpResponse::BadRequest().json(serde_json::json!({"success": false, "error": "country_of_origin is required"}))),
+    };
+    let manufacturer_id = match _payload["manufacturer_id"].as_str() {
+        Some(val) => val,
+        None => return Ok(HttpResponse::BadRequest().json(serde_json::json!({"success": false, "error": "manufacturer_id is required"}))),
+    };
+    let collection_name = _payload["collection_name"].as_str();
+    let wallet_address = match _payload["wallet_address"].as_str() {
+        Some(val) => val,
+        None => return Ok(HttpResponse::BadRequest().json(serde_json::json!({"success": false, "error": "wallet_address is required"}))),
+    };
+    let image_data = _payload["image_data"].as_str();
+    let collection_image_data = _payload["collection_image_data"].as_str();
+
+    // Викликаємо NftService для створення транзакції (з автоматичним upload metadata)
+    let (transaction_data, mint_address) = match _state.nft_service
+        .create_nft_transaction(
+            serial_number,
+            production_date,
+            device_model,
+            warranty_period,
+            country_of_origin,
+            manufacturer_id,
+            collection_name,
+            wallet_address,
+            image_data,
+            collection_image_data,
+        )
+        .await {
+        Ok(res) => res,
+        Err(e) => {
+            log::error!("Failed to create NFT transaction: {:?}", e);
+            return Ok(HttpResponse::InternalServerError().json(serde_json::json!({"success": false, "error": format!("Failed to create NFT transaction: {}", e)})));
+        }
+    };
     Ok(HttpResponse::Ok().json(serde_json::json!({
         "success": true,
-        "transaction": encoded,
-        "service_fee": service_fee,
-        "service_fee_sol": service_fee as f64 / 1_000_000_000.0,
-        "message": "NFT creation transaction created with fee transfer"
+        "transaction": transaction_data,
+        "mint_address": mint_address,
+        "message": "NFT creation transaction created with auto metadata upload"
     })))
 }
 
@@ -256,6 +303,7 @@ async fn create_collection_transaction(
             }))
         }
         Err(e) => {
+            log::error!("Failed to create collection transaction: {:?}", e);
             Ok(HttpResponse::InternalServerError().json(TransactionResponse {
                 success: false,
                 transaction: None,
@@ -271,16 +319,23 @@ async fn submit_signed_transaction(
     _state: web::Data<AppState>,
     _payload: web::Json<SubmitSignedTransactionRequest>,
 ) -> Result<HttpResponse, Error> {
-    let signature = _state.solana_client
+    match _state
+        .solana_client
         .submit_signed_transaction(&_payload.signed_transaction)
         .await
-        .map_err(actix_web::error::ErrorInternalServerError)?;
-    Ok(HttpResponse::Ok().json(serde_json::json!({
-        "success": true,
-        "signature": signature,
-        "message": "Transaction submitted successfully",
-        "explorer_url": format!("https://explorer.solana.com/tx/{}?cluster=devnet", signature),
-    })))
+    {
+        Ok(signature) => Ok(HttpResponse::Ok().json(serde_json::json!({
+            "success": true,
+            "signature": signature
+        }))),
+        Err(e) => {
+            log::error!("Failed to submit signed transaction: {:?}", e);
+            Ok(HttpResponse::InternalServerError().json(serde_json::json!({
+                "success": false,
+                "error": format!("Failed to submit signed transaction: {}", e)
+            })))
+        }
+    }
 }
 
 async fn create_collection(
@@ -290,7 +345,10 @@ async fn create_collection(
     let collection_address = _state.collection_service
         .create_collection(&_payload.name, &_payload.symbol, &_payload.description, &_payload.wallet_address)
         .await
-        .map_err(actix_web::error::ErrorInternalServerError)?;
+        .map_err(|e| {
+            log::error!("Failed to create collection: {:?}", e);
+            actix_web::error::ErrorInternalServerError(e)
+        })?;
     Ok(HttpResponse::Ok().json(UploadResponse {
         success: true,
         image_uri: None,
@@ -317,7 +375,10 @@ async fn create_nft(
             &_payload.wallet_address,
         )
         .await
-        .map_err(actix_web::error::ErrorInternalServerError)?;
+        .map_err(|e| {
+            log::error!("Failed to create NFT: {:?}", e);
+            actix_web::error::ErrorInternalServerError(e)
+        })?;
     Ok(HttpResponse::Ok().json(UploadResponse {
         success: true,
         image_uri: Some(image_uri),
@@ -449,7 +510,10 @@ async fn withdraw_from_treasury(
         amount,
         &recipient_pubkey,
         owner_signature,
-    ).await.map_err(actix_web::error::ErrorInternalServerError)?;
+    ).await.map_err(|e| {
+        log::error!("Failed to withdraw from treasury: {:?}", e);
+        actix_web::error::ErrorInternalServerError(e)
+    })?;
     
     Ok(HttpResponse::Ok().json(serde_json::json!({
         "success": true,
