@@ -1,278 +1,112 @@
-# Smart Product Passport (SPP) - Solana NFT System
+# Smart Product Passport
 
-Система для створення та управління цифровими паспортами продуктів на блокчейні Solana з використанням NFT та колекцій.
+<div align="center">
+  <img src="frontend/app/src/assets/SPP_logo.png" alt="Smart Product Passport Logo" width="200"/>
+  
+  <p>
+    <img src="frontend/app/src/assets/partners_logo/KumekaTeam.svg" alt="Kumeka Team Logo" height="40" style="margin: 0 20px" />
+    <img src="frontend/app/src/assets/partners_logo/Colloseum.svg" alt="Colloseum Logo" height="40" style="margin: 0 20px" />
+  </p>
 
-## 🚀 Особливості
+  <p>
+    <strong>Hackathon Project</strong> 🚀
+  </p>
 
-- **Rust Backend**: Високопродуктивний API на Rust з Actix Web
-- **React Frontend**: Сучасний UI з Tailwind CSS та Framer Motion
-- **Solana Integration**: Повна інтеграція з Solana блокчейном
-- **Wallet Signing**: Підпис транзакцій безпосередньо в браузерному гаманці
-- **Metaplex Support**: Створення NFT та колекцій через Metaplex
-- **Arweave Storage**: Завантаження зображень та metadata на Arweave
-- **Docker Support**: Повна контейнеризація з Docker Compose
-- **Anchor Programs**: Smart contracts на Rust з Anchor framework
+  <img src="frontend/app/src/assets/screenshot.png" alt="Smart Product Passport Screenshot" style="max-width: 100%; margin-top: 20px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"/>
+</div>
 
-## 🏗 Архітектура
+---
 
-```
-SPP/
-├── backend/                 # Rust Backend API
-│   ├── src/
-│   │   ├── main.rs         # Основний файл додатку
-│   │   ├── nft_service.rs  # Сервіс для роботи з NFT
-│   │   ├── collection_service.rs # Сервіс для колекцій
-│   │   ├── solana_client.rs # Клієнт для Solana
-│   │   └── upload_service.rs # Сервіс для завантаження
-│   ├── Cargo.toml          # Rust залежності
-│   ├── Dockerfile          # Docker конфігурація
-│   └── README.md           # Документація бекенду
-├── frontend/               # React Frontend
-│   ├── app/
-│   │   ├── src/
-│   │   │   ├── components/ # React компоненти
-│   │   │   ├── pages/      # Сторінки додатку
-│   │   │   └── utils/      # Утиліти
-│   │   ├── package.json    # Node.js залежності
-│   │   └── Dockerfile      # Docker конфігурація
-├── anchor/                 # Solana Smart Contracts
-│   ├── programs/
-│   │   └── smart-passport/ # Anchor програма
-│   ├── Anchor.toml         # Anchor конфігурація
-│   └── Cargo.toml          # Rust залежності
-├── docker-compose.yml      # Docker Compose конфігурація
-├── build-and-run.sh        # Скрипт для збірки та запуску
-└── README.md               # Цей файл
-```
+## About
 
-## 📋 Вимоги
+**Smart Product Passport** is an innovative blockchain-based solution for product authentication and documentation. Built on the Solana blockchain, our platform provides a secure, transparent, and efficient way to create, manage, and verify digital product passports.
 
-- Docker & Docker Compose
-- Node.js 18+ (для локальної розробки)
-- Rust 1.75+ (для локальної розробки)
-- Solana CLI (для локальної розробки)
-- Anchor CLI (для локальної розробки)
+### Key Features
 
-## 🛠 Швидкий старт
+- 🔐 **Secure Blockchain Storage**: All product data is securely stored on the Solana blockchain
+- 📱 **QR Code Integration**: Easy product verification through QR codes
+- 🏭 **Manufacturer Management**: Dedicated system for manufacturers to create and manage product passports
+- 📄 **Documentation Support**: Upload and store product documentation (PDF, DOC, images)
+- 🔍 **Real-time Verification**: Instant product authenticity verification
+- 🌐 **Decentralized Architecture**: Leveraging Solana's high-performance blockchain
 
-### 1. Клонування репозиторію
-```bash
-git clone <repository-url>
-cd SPP
-```
+---
 
-### 2. Запуск з Docker (рекомендовано)
-```bash
-# Зробити скрипт виконуваним (Linux/Mac)
-chmod +x build-and-run.sh
+## Project Context
 
-# Запустити проект
-./build-and-run.sh
-```
+This project is developed as part of the hackathon organized by **Kumeka Team** and **Colloseum**. We are proud to participate in this innovative competition that brings together the best minds in blockchain and technology.
 
-### 3. Ручний запуск з Docker Compose
-```bash
-# Збірка та запуск всіх сервісів
-docker-compose up --build -d
+### Partners
 
-# Перегляд логів
-docker-compose logs -f
+- **Kumeka Team**: A leading blockchain development and innovation company
+- **Colloseum**: A prominent technology and innovation hub
 
-# Зупинка сервісів
-docker-compose down
-```
+---
 
-## 🌐 Доступні сервіси
+## Technology Stack
 
-Після запуску будуть доступні:
+- **Frontend**: React.js, TailwindCSS, Framer Motion
+- **Blockchain**: Solana, Anchor Framework
+- **Storage**: IPFS (for document storage)
+- **Authentication**: Phantom Wallet
 
-- **Frontend**: http://localhost:3000
-- **Backend API**: http://localhost:8080
-- **Backend Health**: http://localhost:8080/api/health
-- **PostgreSQL**: localhost:5432 (опціонально)
-- **Redis**: localhost:6379 (опціонально)
+---
 
-## 🔧 Налаштування
+## Getting Started
 
-### Змінні середовища
+### Prerequisites
+- Node.js >= 18.x
+- npm >= 9.x
+- Phantom Wallet extension
+- Solana CLI (for smart contract deployment)
 
-Створіть файл `.env` в корені проекту:
+### Installation
 
-```env
-# Backend Configuration
-SOLANA_RPC_URL=https://api.devnet.solana.com
-BUNDLR_URL=https://node1.bundlr.network
-RUST_LOG=info
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/yourusername/smart-product-passport.git
+   cd smart-product-passport
+   ```
+2. **Install dependencies**
+   ```bash
+   cd frontend/app
+   npm install
+   ```
+3. **Configure environment**
+   - Update `/config/.env` with your `ADMIN_PUBLIC_KEY` and other required variables
+   - For smart contract, update `/config/program_config.json` as needed
+4. **Run the frontend**
+   ```bash
+   npm start
+   ```
+5. **Deploy smart contract (optional)**
+   ```bash
+   cd ../../anchor
+   anchor build && anchor deploy
+   ```
 
-# Frontend Configuration
-REACT_APP_BACKEND_URL=http://localhost:8080
-REACT_APP_SOLANA_NETWORK=devnet
+---
 
-# Database Configuration (optional)
-POSTGRES_DB=spp_db
-POSTGRES_USER=spp_user
-POSTGRES_PASSWORD=spp_password
-```
+## Usage
 
-### Створення Keypair
+- **Admin**: Add manufacturers via the Admin Panel
+- **Manufacturer**: Create product passports and generate QR codes
+- **User**: Scan QR codes to verify and mint NFT passports
 
-Для production створіть Solana keypair:
+---
 
-```bash
-solana-keygen new --outfile backend/keypair.json
-```
+## Screenshots
 
-## 📚 API Endpoints
+> _Add your own screenshots to `frontend/app/src/assets/screenshot.png` for best results!_
 
-### Health Check
-```
-GET /api/health
-```
+---
 
-### NFT Operations
-```
-POST /api/create-nft                    # Створення NFT (без підпису)
-POST /api/create-nft-transaction        # Створення транзакції для підпису
-GET /api/get-nfts?wallet_address=<address>
-```
+## License
 
-### Collection Operations
-```
-POST /api/create-collection             # Створення колекції (без підпису)
-POST /api/create-collection-transaction # Створення транзакції для підпису
-GET /api/get-collections?wallet_address=<address>
-```
+[License information will be added here]
 
-### Transaction Operations
-```
-POST /api/submit-signed-transaction     # Відправка підписаної транзакції
-```
+---
 
-### Upload Operations
-```
-POST /api/upload-image
-```
-
-## 🧪 Тестування
-
-### Backend Tests
-```bash
-cd backend
-cargo test
-```
-
-### Frontend Tests
-```bash
-cd frontend/app
-npm test
-```
-
-### Integration Tests
-```bash
-# Запустити всі сервіси
-docker-compose up -d
-
-# Тестувати API
-curl http://localhost:8080/api/health
-```
-
-## 🐛 Debugging
-
-### Логи
-```bash
-# Всі сервіси
-docker-compose logs -f
-
-# Тільки бекенд
-docker-compose logs spp-backend -f
-
-# Тільки фронтенд
-docker-compose logs spp-frontend -f
-```
-
-### Solana Debug
-```bash
-# Перевірка балансу
-solana balance --url devnet
-
-# Перевірка транзакцій
-solana confirm <transaction_signature> --url devnet
-```
-
-## 📦 Deployment
-
-### Production Build
-```bash
-# Збірка production образів
-docker-compose -f docker-compose.prod.yml up --build -d
-```
-
-### Environment Variables для Production
-```env
-SOLANA_RPC_URL=https://api.mainnet-beta.solana.com
-SOLANA_NETWORK=mainnet-beta
-RUST_LOG=warn
-NODE_ENV=production
-```
-
-## 🔒 Безпека
-
-- **Wallet Signing**: Всі транзакції підписуються безпосередньо в браузерному гаманці
-- **No Private Keys**: Бекенд не зберігає приватні ключі користувачів
-- **Transaction Verification**: Кожна транзакція перевіряється перед відправкою
-- **CORS Protection**: API endpoints захищені CORS
-- **Input Validation**: Валідація всіх вхідних даних
-- **Comprehensive Logging**: Логування всіх операцій
-- **HTTPS in Production**: Безпечне з'єднання в production
-
-## 🔐 Wallet Integration
-
-Система підтримує два режими роботи:
-
-### 1. Wallet Signing Mode (Рекомендовано)
-- Транзакції створюються на бекенді
-- Підписуються в браузерному гаманці (Phantom, Solflare, etc.)
-- Максимальна безпека - приватні ключі залишаються у користувача
-
-### 2. Backend Signing Mode
-- Транзакції створюються та підписуються на бекенді
-- Використовується для тестування та адміністративних операцій
-- Потребує налаштування keypair на бекенді
-
-## 🤝 Contributing
-
-1. Fork репозиторій
-2. Створіть feature branch (`git checkout -b feature/amazing-feature`)
-3. Зробіть зміни
-4. Додайте тести
-5. Створіть Pull Request
-
-## 📄 License
-
-MIT License - дивіться LICENSE файл для деталей.
-
-## 🆘 Підтримка
-
-Якщо у вас є питання або проблеми:
-
-1. Перевірте логи: `docker-compose logs`
-2. Перевірте статус: `docker-compose ps`
-3. Створіть Issue в репозиторії
-
-## 🔗 Корисні посилання
-
-- [Solana Documentation](https://docs.solana.com/)
-- [Metaplex Documentation](https://docs.metaplex.com/)
-- [Anchor Documentation](https://www.anchor-lang.com/)
-- [Actix Web Documentation](https://actix.rs/)
-- [React Documentation](https://reactjs.org/)
-- [Docker Documentation](https://docs.docker.com/)
-
-## 🎯 Roadmap
-
-- [ ] Інтеграція з реальними Solana програмами
-- [ ] Підтримка різних типів NFT
-- [ ] Система ролей та дозволів
-- [ ] Аналітика та звіти
-- [ ] Мобільний додаток
-- [ ] Інтеграція з іншими блокчейнами 
+<div align="center">
+  <p>Built with ❤️ for the Kumeka Team & Colloseum Hackathon</p>
+</div> 
