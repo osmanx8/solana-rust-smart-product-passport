@@ -1,34 +1,50 @@
 # Smart Product Passport
 
+> Blockchain-based solution for product authentication and documentation, enabling secure digital passports for products with QR code verification and manufacturer management. Built on Solana blockchain for high performance and security.
+
 <div align="center">
-  <img src="frontend/app/src/assets/SPP_logo.png" alt="Smart Product Passport Logo" width="200"/>
+  <a href="https://arena.colosseum.org/projects/explore/smart-product-passport?previous=L3Byb2plY3RzL2V4cGxvcmU_c2VlZD1kMjk5MWNlNDQ0MmM5MmVkJmhhY2thdGhvbklkPTQmc2VhcmNoPXNt" target="_blank" rel="noopener noreferrer" style="text-decoration: none;">
+    <img src="frontend/app/src/assets/SPP_logo.png" alt="Smart Product Passport Logo" width="200"/>
+  </a>
   
-  <p>
-    <img src="frontend/app/src/assets/partners_logo/KumekaTeam.svg" alt="Kumeka Team Logo" height="40" style="margin: 0 20px" />
-    <img src="frontend/app/src/assets/partners_logo/Colloseum.svg" alt="Colloseum Logo" height="40" style="margin: 0 20px" />
-  </p>
+  <a href="https://arena.colosseum.org/projects/explore/smart-product-passport?previous=L3Byb2plY3RzL2V4cGxvcmU_c2VlZD1kMjk5MWNlNDQ0MmM5MmVkJmhhY2thdGhvbklkPTQmc2VhcmNoPXNt" target="_blank" rel="noopener noreferrer" style="text-decoration: none;">
+    <p style="background: linear-gradient(to right, #60A5FA, #A78BFA); -webkit-background-clip: text; background-clip: text; color: transparent; margin: 10px 0; font-size: 1.1em; display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer;">
+      <span>Until June 23, 2025, you can support our product at the hackathon</span>
+      <span style="font-size: 1.2em;">👍</span>
+    </p>
+  </a>
+
+  <h3 style="color: white; margin: 20px 0 10px 0; font-size: 1.2em;">Supported by</h3>
+  <div style="display: flex; justify-content: center; align-items: center; gap: 40px; margin-bottom: 20px;">
+    <a href="https://kumekateam.com/" target="_blank" rel="noopener noreferrer" style="text-decoration: none;">
+      <img src="frontend/app/src/assets/partners_logo/kumeka_black.jpg" alt="Kumeka Team Logo" height="40" style="padding: 8px;" />
+    </a>
+    <a href="https://www.colosseum.org/" target="_blank" rel="noopener noreferrer" style="text-decoration: none;">
+      <img src="frontend/app/src/assets/partners_logo/colloseum_black.jpg" alt="Colloseum Logo" height="40" style="padding: 8px;" />
+    </a>
+  </div>
 
   <p>
     <strong>Hackathon Project</strong> 🚀
   </p>
 
-  <img src="frontend/app/src/assets/screenshot.png" alt="Smart Product Passport Screenshot" style="max-width: 100%; margin-top: 20px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"/>
+  <img src="frontend/app/src/assets/main-page.png" alt="Smart Product Passport Screenshot" style="max-width: 100%; margin-top: 20px; border-radius: 12px; box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2); border: 1px solid rgba(255, 255, 255, 0.1);"/>
 </div>
 
 ---
 
-## About
+## Про нас
 
-**Smart Product Passport** is an innovative blockchain-based solution for product authentication and documentation. Built on the Solana blockchain, our platform provides a secure, transparent, and efficient way to create, manage, and verify digital product passports.
+**Smart Product Passport** — це інноваційне рішення на основі блокчейну для аутентифікації та документування продуктів. Побудована на блокчейні Solana, наша платформа забезпечує безпечний, прозорий та ефективний спосіб створення, управління та верифікації цифрових паспортів продуктів.
 
-### Key Features
+### Ключові особливості
 
-- 🔐 **Secure Blockchain Storage**: All product data is securely stored on the Solana blockchain
-- 📱 **QR Code Integration**: Easy product verification through QR codes
-- 🏭 **Manufacturer Management**: Dedicated system for manufacturers to create and manage product passports
-- 📄 **Documentation Support**: Upload and store product documentation (PDF, DOC, images)
-- 🔍 **Real-time Verification**: Instant product authenticity verification
-- 🌐 **Decentralized Architecture**: Leveraging Solana's high-performance blockchain
+- 🔐 **Безпечне зберігання в блокчейні**: Всі дані про продукт безпечно зберігаються в блокчейні Solana
+- 📱 **Інтеграція QR-кодів**: Легка верифікація продуктів через QR-коди
+- 🏭 **Управління виробниками**: Спеціалізована система для виробників для створення та управління паспортами продуктів
+- 📄 **Підтримка документації**: Завантаження та зберігання документації продукту (PDF, DOC, зображення)
+- 🔍 **Верифікація в реальному часі**: Миттєва верифікація автентичності продукту
+- 🌐 **Децентралізована архітектура**: Використання високопродуктивного блокчейну Solana
 
 ---
 
@@ -108,5 +124,9 @@ This project is developed as part of the hackathon organized by **Kumeka Team** 
 ---
 
 <div align="center">
-  <p>Built with ❤️ for the Kumeka Team & Colloseum Hackathon</p>
-</div> 
+  <p>Built with ❤️ for Soalana comunity by support of the Kumeka Team & Colloseum Hackathon</p>
+</div>
+
+<!-- Trigger redeploy -->
+
+<!-- Force redeploy - Update deployment --> 
