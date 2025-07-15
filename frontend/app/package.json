@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@heroicons/react": "^2.0.18",
+    "@irys/sdk": "^0.2.11",
     "@metaplex-foundation/js": "^0.11.6",
     "@metaplex-foundation/mpl-token-metadata": "^3.4.0",
     "@radix-ui/react-slot": "^1.2.3",

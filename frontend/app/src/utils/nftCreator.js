@@ -5,6 +5,7 @@
 
 import { formatNftMetadata } from './nftUtils';
 import { Transaction } from '@solana/web3.js';
+import { uploadMetadataDevnetOrMainnet } from './bundlrUpload';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8080';
 
@@ -17,6 +18,8 @@ export async function mintPassportWithMetaplex(wallet, file, formData, collectio
     }
 
     const walletAddress = wallet.publicKey.toString();
+    const network = 'devnet'; // <-- Вказуємо devnet
+    const web3StorageToken = import.meta.env.VITE_WEB3STORAGE_TOKEN;
 
     // 1. Конвертуємо файли в base64
     let imageData = null;
@@ -29,6 +32,14 @@ export async function mintPassportWithMetaplex(wallet, file, formData, collectio
     if (collectionImage) {
       collectionImageData = await fileToBase64(collectionImage);
     }
+
+    // === Завантаження метаданих на IPFS (devnet) або Bundlr (mainnet) ===
+    const metadata = formatNftMetadata(formData);
+    if (imageData) {
+      metadata.image = imageData;
+    }
+    const arweaveMetadataUrl = await uploadMetadataDevnetOrMainnet(wallet, metadata, network, web3StorageToken);
+    // ===============================================
 
     // 2. Створюємо колекцію (якщо вказана)
     let collectionAddress = null;
@@ -104,6 +115,7 @@ export async function mintPassportWithMetaplex(wallet, file, formData, collectio
         wallet_address: walletAddress,
         image_data: imageData,
         collection_image_data: collectionImageData,
+        metadata_uri: arweaveMetadataUrl, // <-- Передаємо IPFS/Bundlr URL метаданих
       }),
     });
 

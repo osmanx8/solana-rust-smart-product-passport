@@ -12,6 +12,7 @@ use std::str::FromStr;
 use tokio;
 use std::thread;
 use solana_client::SolanaClient;
+use solana_sdk::signature::Signer;
 mod nft_service;
 mod collection_service;
 mod solana_client;
@@ -52,6 +53,7 @@ pub struct CreateNftTransactionRequest {
     pub wallet_address: String,
     pub image_data: Option<String>, // base64 encoded image
     pub collection_image_data: Option<String>, // base64 encoded collection image
+    pub metadata_uri: Option<String>, // <-- Додаємо поле
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -248,6 +250,35 @@ async fn create_nft_transaction(
     };
     let image_data = _payload["image_data"].as_str();
     let collection_image_data = _payload["collection_image_data"].as_str();
+    let metadata_uri = _payload["metadata_uri"].as_str();
+
+    if let Some(metadata_uri) = metadata_uri {
+        // Використовуємо тільки цей URI для mint NFT
+        let mint_keypair = _state.solana_client.generate_keypair();
+        let mint_pubkey = mint_keypair.pubkey();
+        let fee_payer = Pubkey::from_str(wallet_address)
+            .map_err(|e| actix_web::error::ErrorBadRequest(format!("Invalid wallet_address: {}", e)))?;
+        let instructions = _state.solana_client
+            .create_nft_instructions(metadata_uri, "SPP Passport", "SPP", &fee_payer, &mint_pubkey)
+            .await
+            .map_err(|e| {
+                log::error!("Failed to create NFT instructions: {:?}", e);
+                actix_web::error::ErrorInternalServerError(e)
+            })?;
+        let transaction_data = _state.solana_client
+            .create_nft_transaction_with_mint(instructions, &fee_payer, &mint_keypair)
+            .await
+            .map_err(|e| {
+                log::error!("Failed to create NFT transaction: {:?}", e);
+                actix_web::error::ErrorInternalServerError(e)
+            })?;
+        return Ok(HttpResponse::Ok().json(serde_json::json!({
+            "success": true,
+            "transaction": transaction_data,
+            "mint_address": mint_pubkey.to_string(),
+            "message": "NFT creation transaction created with provided metadata_uri"
+        })));
+    }
 
     // Викликаємо NftService для створення транзакції (з автоматичним upload metadata)
     let (transaction_data, mint_address) = match _state.nft_service
