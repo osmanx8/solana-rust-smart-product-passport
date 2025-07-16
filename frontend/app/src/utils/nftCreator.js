@@ -5,7 +5,7 @@
 
 import { formatNftMetadata } from './nftUtils';
 import { Transaction } from '@solana/web3.js';
-import { uploadMetadataDevnetOrMainnet } from './bundlrUpload';
+import { uploadMetadataDevnetOrMainnet } from './irysUpload';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8080';
 
