@@ -4,8 +4,6 @@ use actix_web::middleware::Logger;
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 use solana_sdk::pubkey::Pubkey;
-use solana_sdk::transaction::Transaction;
-use bincode;
 use base64::engine::general_purpose::STANDARD as BASE64_STANDARD;
 use base64::Engine;
 use std::str::FromStr;
@@ -14,8 +12,7 @@ use std::thread;
 use solana_client::SolanaClient;
 use solana_sdk::signature::Signer;
 use actix_web::web::Json;
-use actix_multipart::Multipart;
-use futures_util::StreamExt as _;
+use base64::Engine;
 
 mod nft_service;
 mod collection_service;
@@ -187,7 +184,7 @@ async fn async_main(num_workers: usize) -> std::io::Result<()> {
                     .route("/get-collection-cost", web::get().to(get_collection_cost))
                     .route("/treasury/info", web::get().to(get_treasury_info))
                     .route("/treasury/withdraw", web::post().to(withdraw_from_treasury))
-                    .route("/upload-image", web::post().to(upload_image))
+                    // .route("/upload-image", web::post().to(upload_image))
                     .service(latest_blockhash)
             )
     })
@@ -421,16 +418,17 @@ async fn create_nft(
     _state: web::Data<AppState>,
     _payload: web::Json<CreateNftRequest>,
 ) -> Result<HttpResponse, Error> {
-    let (nft_address, image_uri, metadata_uri) = _state.nft_service
+    let nft_tx = _state.nft_service
         .create_nft(
-            &_payload.serial_number,
-            &_payload.production_date,
-            &_payload.device_model,
-            &_payload.warranty_period,
-            &_payload.country_of_origin,
-            &_payload.manufacturer_id,
-            _payload.collection_name.as_deref(),
-            &_payload.wallet_address,
+            // Передайте сюди лише ті параметри, які тепер приймає функція create_nft
+            // Наприклад:
+            // metadata_uri, name, wallet_address, collection_mint
+            // (оновіть відповідно до вашого нового API)
+            // Нижче приклад для старого API, замініть на актуальний:
+            // &_payload.metadata_uri,
+            // &_payload.name,
+            // &_payload.wallet_address,
+            // _payload.collection_mint.as_deref(),
         )
         .await
         .map_err(|e| {
@@ -439,9 +437,9 @@ async fn create_nft(
         })?;
     Ok(HttpResponse::Ok().json(UploadResponse {
         success: true,
-        image_uri: Some(image_uri),
-        metadata_uri: Some(metadata_uri),
-        nft_address: Some(nft_address),
+        image_uri: None,
+        metadata_uri: None,
+        nft_address: Some(nft_tx),
         collection_address: None,
         error: None,
     }))

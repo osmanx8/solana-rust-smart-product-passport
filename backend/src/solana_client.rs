@@ -17,13 +17,11 @@ use spl_token::id as spl_token_program_id;
 use spl_associated_token_account::get_associated_token_address;
 use spl_associated_token_account::instruction as ata_instruction;
 use mpl_token_metadata::instructions as mpl_instruction;
-use mpl_token_metadata::ID as TOKEN_METADATA_PROGRAM_ID;
-use solana_sdk::system_program;
-use solana_sdk::sysvar;
-use solana_program::program_pack::Pack;
+use mpl_token_metadata::instructions::set_and_verify_sized_collection_item;
 use mpl_token_metadata::accounts::{MasterEdition, Metadata};
 use mpl_token_metadata::instructions::CreateV1Builder;
 use mpl_token_metadata::types::PrintSupply;
+use solana_program::program_pack::Pack;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct NftCreationCost {
@@ -645,5 +643,28 @@ impl SolanaClient {
     pub async fn get_treasury_balance(&self) -> Result<u64> {
         let balance = self.rpc_client.get_balance(&self.treasury_address).await?;
         Ok(balance)
+    }
+
+    /// Створює інструкцію для прив'язки NFT до колекції (Metaplex)
+    pub fn create_set_collection_instruction(
+        &self,
+        nft_mint: &Pubkey,
+        collection_mint: &Pubkey,
+        authority: &Pubkey,
+    ) -> solana_sdk::instruction::Instruction {
+        let nft_metadata = Metadata::find_pda(nft_mint).0;
+        let collection_metadata = Metadata::find_pda(collection_mint).0;
+        let collection_master_edition = MasterEdition::find_pda(collection_mint).0;
+
+        set_and_verify_sized_collection_item(
+            mpl_token_metadata::ID,
+            nft_metadata,
+            *authority,
+            *authority,
+            *collection_mint,
+            collection_metadata,
+            collection_master_edition,
+            None, // collection authority record (optional)
+        )
     }
 } 
