@@ -58,6 +58,7 @@ import {
   CreditCardIcon
 } from '@heroicons/react/24/outline';
 import { Metaplex } from '@metaplex-foundation/js';
+import CreateCollectionPage from './components/CreateCollectionPage';
 
 const Navigation = ({ walletAddress, role, connectWallet, disconnectWallet, addManufacturer }) => {
   const { t } = useTranslation();
@@ -144,6 +145,10 @@ const Navigation = ({ walletAddress, role, connectWallet, disconnectWallet, addM
                   <NavLink to="/create-nft" className="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium flex items-center transition-colors">
                     <PlusIcon className="w-4 h-4 mr-2" />
                     {t('createNFT')}
+                  </NavLink>
+                  <NavLink to="/create-collection" className="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium flex items-center transition-colors">
+                    <CircleStackIcon className="w-4 h-4 mr-2" />
+                    {t('createCollection')}
                   </NavLink>
                 </div>
               </div>
@@ -366,7 +371,7 @@ const LandingPage = () => {
       </div>
 
       {/* 3D Box Section */}
-      <ThreeDBoxSection />
+      {/* <ThreeDBoxSection /> */}
 
       {/* Додаємо компонент Community */}
       <Community />
@@ -1105,6 +1110,7 @@ const App = () => {
                 )
               }
             />
+            <Route path="/create-collection" element={<CreateCollectionPage />} />
           </Routes>
         </div>
         <ComicsSection />

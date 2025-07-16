@@ -132,5 +132,21 @@
   "mint_account_fee": "Mint Account (token account)",
   "token_account_fee": "Token Account (balance account)",
   "metadata_account_fee": "Metadata Account (metadata)",
-  "collection_creation_fee": "Collection creation fee"
+  "collection_creation_fee": "Collection creation fee",
+  "createCollection": "Create Collection",
+  "create_collection_title": "Create a new collection",
+  "create_collection_name_label": "Collection Name",
+  "create_collection_name_placeholder": "Enter collection name",
+  "create_collection_symbol_label": "Symbol",
+  "create_collection_symbol_placeholder": "Enter symbol (max 10 characters)",
+  "create_collection_description_label": "Description",
+  "create_collection_description_placeholder": "Enter collection description",
+  "create_collection_image_label": "Collection Image",
+  "create_collection_image_upload": "Upload image",
+  "create_collection_submit": "Create Collection",
+  "create_collection_success": "Collection created successfully!",
+  "create_collection_error": "Failed to create collection.",
+  "create_collection_required": "This field is required.",
+  "create_collection_symbol_length": "Symbol must be 1-10 characters.",
+  "create_collection_image_hint": "Supported formats: PNG, JPG, GIF, WEBP. Max size: 5MB."
 } 

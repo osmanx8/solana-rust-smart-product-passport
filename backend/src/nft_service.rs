@@ -145,7 +145,7 @@ impl NftService {
         }
 
         Ok(NftMetadata {
-            name: format!("SPP Passport - {}", serial_number),
+            name: device_model.to_string(),
             symbol: "SPP".to_string(),
             description: format!("Smart Product Passport for {}", device_model),
             image: "https://arweave.net/placeholder-image".to_string(), // Буде замінено на реальне зображення
@@ -190,9 +190,12 @@ impl NftService {
     pub async fn get_nfts_by_owner(&self, wallet_address: &str) -> Result<Vec<NftInfo>, anyhow::Error> {
         // Тут буде логіка отримання NFT по власнику
         // Поки що повертаємо заглушку
+        // Спробуємо отримати останній створений mint_address для цього користувача
+        // (У реальному додатку тут має бути запит до Solana або бази даних)
+        let mint_address = "mock_nft_address".to_string(); // TODO: замінити на реальний пошук
         let nfts = vec![
             NftInfo {
-                address: "mock_nft_address".to_string(),
+                address: mint_address.clone(),
                 name: "SPP Passport - TEST001".to_string(),
                 symbol: "SPP".to_string(),
                 uri: "https://arweave.net/mock-metadata".to_string(),
@@ -200,7 +203,6 @@ impl NftService {
                 collection: Some("Test Collection".to_string()),
             }
         ];
-        
         Ok(nfts)
     }
 

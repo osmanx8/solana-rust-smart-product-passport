@@ -121,5 +121,21 @@
   "mint_account_fee": "Mint Account (рахунок токена)",
   "token_account_fee": "Token Account (рахунок балансу)",
   "metadata_account_fee": "Metadata Account (метадані)",
-  "collection_creation_fee": "Комісія за створення колекції"
+  "collection_creation_fee": "Комісія за створення колекції",
+  "createCollection": "Створити колекцію",
+  "create_collection_title": "Створення нової колекції",
+  "create_collection_name_label": "Назва колекції",
+  "create_collection_name_placeholder": "Введіть назву колекції",
+  "create_collection_symbol_label": "Символ",
+  "create_collection_symbol_placeholder": "Введіть символ (до 10 символів)",
+  "create_collection_description_label": "Опис",
+  "create_collection_description_placeholder": "Введіть опис колекції",
+  "create_collection_image_label": "Зображення колекції",
+  "create_collection_image_upload": "Завантажити зображення",
+  "create_collection_submit": "Створити колекцію",
+  "create_collection_success": "Колекцію успішно створено!",
+  "create_collection_error": "Не вдалося створити колекцію.",
+  "create_collection_required": "Це поле обов'язкове.",
+  "create_collection_symbol_length": "Символ має бути від 1 до 10 символів.",
+  "create_collection_image_hint": "Підтримувані формати: PNG, JPG, GIF, WEBP. Максимальний розмір: 5MB."
 } 

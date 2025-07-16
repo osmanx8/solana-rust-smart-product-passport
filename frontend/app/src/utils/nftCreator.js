@@ -5,7 +5,6 @@
 
 import { formatNftMetadata } from './nftUtils';
 import { Transaction } from '@solana/web3.js';
-import { uploadMetadataDevnetOrMainnet } from './irysUpload';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8080';
 
@@ -33,12 +32,28 @@ export async function mintPassportWithMetaplex(wallet, file, formData, collectio
       collectionImageData = await fileToBase64(collectionImage);
     }
 
-    // === Завантаження метаданих на IPFS (devnet) або Bundlr (mainnet) ===
+    // === Відправляємо метадані на бекенд для завантаження у Arweave ===
     const metadata = formatNftMetadata(formData);
     if (imageData) {
       metadata.image = imageData;
     }
-    const arweaveMetadataUrl = await uploadMetadataDevnetOrMainnet(wallet, metadata, network, web3StorageToken);
+    // Новий endpoint для завантаження метаданих
+    const metadataUploadResponse = await fetch(`${BACKEND_URL}/api/upload-metadata`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        metadata,
+        image_data: imageData,
+        collection_image_data: collectionImageData,
+      }),
+    });
+    if (!metadataUploadResponse.ok) {
+      const errorData = await metadataUploadResponse.json();
+      throw new Error(`Failed to upload metadata: ${errorData.error || metadataUploadResponse.statusText}`);
+    }
+    const { metadata_uri } = await metadataUploadResponse.json();
     // ===============================================
 
     // 2. Створюємо колекцію (якщо вказана)
@@ -115,7 +130,7 @@ export async function mintPassportWithMetaplex(wallet, file, formData, collectio
         wallet_address: walletAddress,
         image_data: imageData,
         collection_image_data: collectionImageData,
-        metadata_uri: arweaveMetadataUrl, // <-- Передаємо IPFS/Bundlr URL метаданих
+        metadata_uri: metadata_uri, // <-- Передаємо Arweave URL метаданих
       }),
     });
 

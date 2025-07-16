@@ -7,11 +7,17 @@ import { Buffer } from 'buffer'
 import process from 'process'
 import { getSolanaExplorerUrl } from '../utils/nftUtils';
 import CostCalculator from './CostCalculator';
+import { fetchCollectionsByOwner } from '../utils/nftCreator';
+import { createCollectionWithMetaplex } from '../utils/collectionCreator';
+import { uploadImage } from '../utils/nftCreator';
+import { getNames } from 'country-list';
 
 if (!window.Buffer) window.Buffer = Buffer
 if (!window.process) window.process = process
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+
+const COUNTRIES = Object.values(getNames());
 
 const CreateNFTPage = ({
   handleInputChange,
@@ -32,6 +38,42 @@ const CreateNFTPage = ({
   const [localStatus, setLocalStatus] = useState('');
   const [collectionImagePreview, setCollectionImagePreview] = useState(null);
   const [copied, setCopied] = useState(false);
+  const [collections, setCollections] = useState([]);
+  const [selectedCollection, setSelectedCollection] = useState('');
+  // Видаляю все, що стосується створення нової колекції у цій формі
+  const [walletAddress, setWalletAddress] = useState(null);
+
+  useEffect(() => {
+    if (window.solana && window.solana.publicKey) {
+      setWalletAddress(window.solana.publicKey.toString());
+    } else if (window.solana && window.solana.isPhantom) {
+      window.solana.connect({ onlyIfTrusted: true }).then(res => {
+        setWalletAddress(res.publicKey.toString());
+      });
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!walletAddress) return;
+    fetchCollectionsByOwner(walletAddress)
+      .then(data => {
+        setCollections(data.collections || []);
+      })
+      .catch(() => setCollections([]));
+  }, [walletAddress]);
+
+  const handleCollectionSelect = (e) => {
+    const value = e.target.value;
+    setSelectedCollection(value);
+    // Видаляю все, що стосується створення нової колекції у цій формі
+    handleInputChange({ target: { name: 'collectionName', value } });
+  };
+
+  // Видаляю все, що стосується створення нової колекції у цій формі
+  // const handleNewCollectionNameChange = (e) => {
+  //   setNewCollectionName(e.target.value);
+  //   handleInputChange({ target: { name: 'collectionName', value: e.target.value } });
+  // };
 
   useEffect(() => {
     if (nftAddress) {
@@ -111,6 +153,34 @@ const CreateNFTPage = ({
     }
   };
 
+  // Видаляю все, що стосується створення нової колекції у цій формі
+  // const handleCreateCollection = async () => {
+  //   if (!window.solana || !window.solana.publicKey || !newCollectionName || !collectionImage) {
+  //     alert('Введіть назву колекції та виберіть зображення!');
+  //     return;
+  //   }
+  //   try {
+  //     // 1. Завантажити зображення і отримати URL
+  //     const imageUrl = await uploadImage(collectionImage);
+  //     // 2. Створити колекцію з imageUrl
+  //     const collectionData = {
+  //       name: newCollectionName,
+  //       image: imageUrl,
+  //     };
+  //     const address = await createCollectionWithMetaplex(window.solana, collectionData);
+  //     // Додаємо нову колекцію у список і вибираємо її
+  //     const newCol = { name: newCollectionName, address };
+  //     setCollections(prev => [...prev, newCol]);
+  //     setSelectedCollection(newCollectionName);
+  //     setShowNewCollectionInput(false);
+  //     setNewCollectionName('');
+  //     handleInputChange({ target: { name: 'collectionName', value: newCollectionName } });
+  //     alert('Колекцію створено!');
+  //   } catch (e) {
+  //     alert('Помилка створення колекції: ' + e.message);
+  //   }
+  // };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!collectionImage) {
@@ -157,9 +227,9 @@ const CreateNFTPage = ({
           </h1>
 
           {/* Калькулятор комісій */}
-          <div className="mb-8">
+          {/* <div className="mb-8">
             <CostCalculator />
-          </div>
+          </div> */}
 
           {!nftAddress ? (
             <form onSubmit={handleSubmit} className="space-y-6">
@@ -227,15 +297,18 @@ const CreateNFTPage = ({
                   <label className="block text-sm font-medium text-gray-300 mb-2">
                     Country of Origin
                   </label>
-                  <input
-                    type="text"
+                  <select
                     name="countryOfOrigin"
                     value={formData.countryOfOrigin}
                     onChange={handleInputChange}
                     required
                     className="w-full bg-gray-700/50 text-white px-4 py-2 rounded-lg border border-gray-600 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors"
-                    placeholder="Enter country of origin"
-                  />
+                  >
+                    <option value="">Select country</option>
+                    {COUNTRIES.map((country) => (
+                      <option key={country} value={country}>{country}</option>
+                    ))}
+                  </select>
                 </div>
 
                 <div>
@@ -256,15 +329,22 @@ const CreateNFTPage = ({
                   <label className="block text-sm font-medium text-gray-300 mb-2">
                     {t('collection_name')}
                   </label>
-                  <input
-                    type="text"
-                    name="collectionName"
-                    value={formData.collectionName}
-                    onChange={handleInputChange}
-                    required
-                    className="w-full bg-gray-700/50 text-white px-4 py-2 rounded-lg border border-gray-600 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors"
-                    placeholder={t('collection_name')}
-                  />
+                  <div className="flex gap-2 items-center">
+                    <select
+                      name="collectionSelect"
+                      value={selectedCollection}
+                      onChange={handleCollectionSelect}
+                      className="w-full bg-gray-700/50 text-white px-4 py-2 rounded-lg border border-gray-600 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors"
+                    >
+                      <option value="">{t('collection_placeholder')}</option>
+                      {collections.map((col) => (
+                        <option key={col.address || col.name} value={col.name}>{col.name}</option>
+                      ))}
+                      {/* Видаляю опцію "__new__" */}
+                    </select>
+                    {/* Видаляю кнопку створення нової колекції */}
+                  </div>
+                  {/* Видаляю поле для нової колекції */}
                 </div>
               </div>
 

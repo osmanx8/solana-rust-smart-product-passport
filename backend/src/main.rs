@@ -13,6 +13,10 @@ use tokio;
 use std::thread;
 use solana_client::SolanaClient;
 use solana_sdk::signature::Signer;
+use actix_web::web::Json;
+use actix_multipart::Multipart;
+use futures_util::StreamExt as _;
+
 mod nft_service;
 mod collection_service;
 mod solana_client;
@@ -89,6 +93,19 @@ pub struct SubmitSignedTransactionRequest {
     pub transaction_type: String, // "nft" or "collection"
 }
 
+#[derive(Debug, Serialize, Deserialize)]
+pub struct UploadMetadataRequest {
+    pub metadata: serde_json::Value,
+    pub image_data: Option<String>,
+    pub collection_image_data: Option<String>,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct UploadImageRequest {
+    pub image_data: String, // base64 encoded image
+    pub filename: String,
+}
+
 // Структура для зберігання стану додатку
 pub struct AppState {
     pub nft_service: Arc<NftService>,
@@ -158,7 +175,7 @@ async fn async_main(num_workers: usize) -> std::io::Result<()> {
             .service(
                 web::scope("/api")
                     .route("/health", web::get().to(health_check))
-                    .route("/upload-image", web::post().to(upload_image))
+                    .route("/upload-metadata", web::post().to(upload_metadata))
                     .route("/create-collection", web::post().to(create_collection))
                     .route("/create-nft", web::post().to(create_nft))
                     .route("/create-nft-transaction", web::post().to(create_nft_transaction))
@@ -170,6 +187,7 @@ async fn async_main(num_workers: usize) -> std::io::Result<()> {
                     .route("/get-collection-cost", web::get().to(get_collection_cost))
                     .route("/treasury/info", web::get().to(get_treasury_info))
                     .route("/treasury/withdraw", web::post().to(withdraw_from_treasury))
+                    .route("/upload-image", web::post().to(upload_image))
                     .service(latest_blockhash)
             )
     })
@@ -201,15 +219,24 @@ async fn health_check() -> HttpResponse {
     }))
 }
 
-async fn upload_image(
-    _state: web::Data<AppState>,
-    _payload: web::Json<serde_json::Value>,
+async fn upload_metadata(
+    state: web::Data<AppState>,
+    payload: Json<UploadMetadataRequest>,
 ) -> Result<HttpResponse, Error> {
-    // Тут буде логіка завантаження зображення
-    // Поки що повертаємо заглушку
+    // Використовуємо upload_service для завантаження метаданих
+    let metadata_uri = match state.upload_service.upload_metadata(&payload.metadata).await {
+        Ok(uri) => uri,
+        Err(e) => {
+            log::error!("Failed to upload metadata: {:?}", e);
+            return Ok(HttpResponse::InternalServerError().json(serde_json::json!({
+                "success": false,
+                "error": format!("Failed to upload metadata: {}", e)
+            })));
+        }
+    };
     Ok(HttpResponse::Ok().json(serde_json::json!({
         "success": true,
-        "image_uri": "https://arweave.net/placeholder"
+        "metadata_uri": metadata_uri
     })))
 }
 
@@ -550,5 +577,36 @@ async fn withdraw_from_treasury(
         "success": true,
         "signature": result,
         "message": "Treasury withdrawal successful"
+    })))
+} 
+
+#[actix_web::post("/upload-image")]
+async fn upload_image(
+    state: web::Data<AppState>,
+    payload: Json<UploadImageRequest>,
+) -> Result<HttpResponse, Error> {
+    let image_data = match BASE64_STANDARD.decode(&payload.image_data) {
+        Ok(data) => data,
+        Err(e) => {
+            log::error!("Failed to decode base64 image: {:?}", e);
+            return Ok(HttpResponse::BadRequest().json(serde_json::json!({
+                "success": false,
+                "error": format!("Failed to decode base64 image: {}", e)
+            })));
+        }
+    };
+    let image_uri = match state.upload_service.upload_image(&image_data, &payload.filename).await {
+        Ok(uri) => uri,
+        Err(e) => {
+            log::error!("Failed to upload image: {:?}", e);
+            return Ok(HttpResponse::InternalServerError().json(serde_json::json!({
+                "success": false,
+                "error": format!("Failed to upload image: {}", e)
+            })));
+        }
+    };
+    Ok(HttpResponse::Ok().json(serde_json::json!({
+        "success": true,
+        "image_uri": image_uri
     })))
 } 
