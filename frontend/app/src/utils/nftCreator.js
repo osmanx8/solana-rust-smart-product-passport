@@ -3,214 +3,107 @@
  * Створення NFT через Rust Backend API з підписом транзакцій в браузері
  */
 
-import { formatNftMetadata } from './nftUtils';
-import { Transaction } from '@solana/web3.js';
+import Irys from '@irys/sdk';
+import { Keypair, PublicKey } from '@solana/web3.js';
 
+const IRYS_NODE = 'https://node1.irys.xyz'; // або ваш вузол
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8080';
 
-export async function mintPassportWithMetaplex(wallet, file, formData, collectionImage) {
-  try {
-    console.log('Starting NFT creation process with wallet signing...');
-    
-    if (!wallet || !wallet.publicKey) {
-      throw new Error('Wallet not connected');
-    }
-
-    const walletAddress = wallet.publicKey.toString();
-    const network = 'devnet'; // <-- Вказуємо devnet
-    const web3StorageToken = import.meta.env.VITE_WEB3STORAGE_TOKEN;
-
-    // 1. Конвертуємо файли в base64
-    let imageData = null;
-    let collectionImageData = null;
-
-    if (file) {
-      imageData = await fileToBase64(file);
-    }
-
-    if (collectionImage) {
-      collectionImageData = await fileToBase64(collectionImage);
-    }
-
-    // === Відправляємо метадані на бекенд для завантаження у Arweave ===
-    const metadata = formatNftMetadata(formData);
-    if (imageData) {
-      metadata.image = imageData;
-    }
-    // Новий endpoint для завантаження метаданих
-    const metadataUploadResponse = await fetch(`${BACKEND_URL}/api/upload-metadata`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        metadata,
-        image_data: imageData,
-        collection_image_data: collectionImageData,
-      }),
-    });
-    if (!metadataUploadResponse.ok) {
-      const errorData = await metadataUploadResponse.json();
-      throw new Error(`Failed to upload metadata: ${errorData.error || metadataUploadResponse.statusText}`);
-    }
-    const { metadata_uri } = await metadataUploadResponse.json();
-    // ===============================================
-
-    // 2. Створюємо колекцію (якщо вказана)
-    let collectionAddress = null;
-    if (formData.collectionName) {
-      console.log('Creating collection transaction:', formData.collectionName);
-      
-      const collectionTransactionResponse = await fetch(`${BACKEND_URL}/api/create-collection-transaction`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          name: formData.collectionName,
-          symbol: formData.collectionName.substring(0, 3).toUpperCase(),
-          description: `Collection for ${formData.collectionName}`,
-          wallet_address: walletAddress,
-          image_data: collectionImageData,
-        }),
-      });
-
-      if (!collectionTransactionResponse.ok) {
-        const errorData = await collectionTransactionResponse.json();
-        throw new Error(`Failed to create collection transaction: ${errorData.error || collectionTransactionResponse.statusText}`);
-      }
-
-      const collectionTransactionData = await collectionTransactionResponse.json();
-      
-      if (!collectionTransactionData.success) {
-        throw new Error(`Collection transaction creation failed: ${collectionTransactionData.error}`);
-      }
-
-      // 3. Підписуємо транзакцію колекції в гаманці
-      console.log('Signing collection transaction...');
-      const signedCollectionTransaction = await signTransaction(wallet, collectionTransactionData.transaction);
-      
-      // 4. Відправляємо підписану транзакцію
-      const submitCollectionResponse = await fetch(`${BACKEND_URL}/api/submit-signed-transaction`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          signed_transaction: signedCollectionTransaction,
-          transaction_type: 'collection',
-        }),
-      });
-
-      if (!submitCollectionResponse.ok) {
-        const errorData = await submitCollectionResponse.json();
-        throw new Error(`Failed to submit collection transaction: ${errorData.error || submitCollectionResponse.statusText}`);
-      }
-
-      const submitCollectionData = await submitCollectionResponse.json();
-      console.log('Collection created successfully:', submitCollectionData);
-    }
-
-    // 5. Створюємо транзакцію для NFT
-    console.log('Creating NFT transaction with data:', formData);
-    
-    const nftTransactionResponse = await fetch(`${BACKEND_URL}/api/create-nft-transaction`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        serial_number: formData.serialNumber,
-        production_date: formData.productionDate,
-        device_model: formData.deviceModel,
-        warranty_period: formData.warrantyPeriod,
-        country_of_origin: formData.countryOfOrigin,
-        manufacturer_id: formData.manufacturerId,
-        collection_name: formData.collectionName || null,
-        wallet_address: walletAddress,
-        image_data: imageData,
-        collection_image_data: collectionImageData,
-        metadata_uri: metadata_uri, // <-- Передаємо Arweave URL метаданих
-      }),
-    });
-
-    if (!nftTransactionResponse.ok) {
-      const errorData = await nftTransactionResponse.json();
-      throw new Error(`Failed to create NFT transaction: ${errorData.error || nftTransactionResponse.statusText}`);
-    }
-
-    const nftTransactionData = await nftTransactionResponse.json();
-    
-    if (!nftTransactionData.success) {
-      throw new Error(`NFT transaction creation failed: ${nftTransactionData.error}`);
-    }
-
-    // 6. Підписуємо транзакцію NFT в гаманці
-    console.log('Signing NFT transaction...');
-    const signedNftTransaction = await signTransaction(wallet, nftTransactionData.transaction);
-    
-    // 7. Відправляємо підписану транзакцію NFT
-    const submitNftResponse = await fetch(`${BACKEND_URL}/api/submit-signed-transaction`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        signed_transaction: signedNftTransaction,
-        transaction_type: 'nft',
-      }),
-    });
-
-    if (!submitNftResponse.ok) {
-      const errorData = await submitNftResponse.json();
-      throw new Error(`Failed to submit NFT transaction: ${errorData.error || submitNftResponse.statusText}`);
-    }
-
-    const submitNftData = await submitNftResponse.json();
-    console.log('NFT created successfully:', submitNftData);
-    
-    return {
-      signature: submitNftData.signature,
-      mintAddress: nftTransactionData.mint_address,
-    };
-  } catch (error) {
-    console.error('Error in mintPassportWithMetaplex:', error);
-    throw error;
-  }
+// Конвертація файлу у Buffer
+export async function fileToBuffer(file) {
+  return new Uint8Array(await file.arrayBuffer());
 }
 
-// Функція для конвертації файлу в base64
-async function fileToBase64(file) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
-    reader.onload = () => {
-      const base64 = reader.result.split(',')[1]; // Видаляємо data:image/...;base64,
-      resolve(base64);
-    };
-    reader.onerror = error => reject(error);
+// Підпис Solana-транзакції для Irys
+async function getSolanaSigner(wallet) {
+  return {
+    publicKey: new PublicKey(wallet.publicKey),
+    signMessage: async (message) => {
+      const signed = await wallet.signMessage(message, 'utf8');
+      return signed;
+    }
+  };
+}
+
+// Завантаження зображення у Irys
+export async function uploadImageToIrys(wallet, file) {
+  const signer = await getSolanaSigner(wallet);
+  const irys = new Irys({
+    url: IRYS_NODE,
+    token: 'solana',
+    wallet: signer,
   });
+
+  const buffer = await fileToBuffer(file);
+  const tx = await irys.upload(buffer, {
+    tags: [{ name: 'Content-Type', value: file.type }]
+  });
+  return `https://arweave.net/${tx.id}`;
 }
 
-// Функція для підпису транзакції в гаманці
-async function signTransaction(wallet, transactionBase64) {
-  try {
-    const transactionBuffer = Buffer.from(transactionBase64, 'base64');
-    const transaction = Transaction.from(transactionBuffer);
+// Завантаження метаданих у Irys
+export async function uploadMetadataToIrys(wallet, metadata) {
+  const signer = await getSolanaSigner(wallet);
+  const irys = new Irys({
+    url: IRYS_NODE,
+    token: 'solana',
+    wallet: signer,
+  });
 
-    // Отримуємо актуальний blockhash з бекенду
-    const res = await fetch(`${BACKEND_URL}/api/latest-blockhash`);
-    const data = await res.json();
-    if (!data.success) throw new Error('Failed to fetch latest blockhash');
-    transaction.recentBlockhash = data.blockhash;
+  const data = JSON.stringify(metadata);
+  const tx = await irys.upload(data, {
+    tags: [{ name: 'Content-Type', value: 'application/json' }]
+  });
+  return `https://arweave.net/${tx.id}`;
+}
 
-    const signedTransaction = await wallet.signTransaction(transaction);
-    const signedTransactionBase64 = Buffer.from(signedTransaction.serialize()).toString('base64');
-    return signedTransactionBase64;
-  } catch (error) {
-    console.error('Error signing transaction:', error);
-    throw new Error('Failed to sign transaction in wallet');
+// Основна функція для створення NFT
+export async function mintPassportWithIrys(wallet, file, formData, collectionMint) {
+  if (!wallet || !wallet.publicKey) throw new Error('Wallet not connected');
+
+  // 1. Завантажуємо зображення у Irys
+  let imageUri = '';
+  if (file) {
+    imageUri = await uploadImageToIrys(wallet, file);
   }
+
+  // 2. Формуємо метадані
+  const metadata = {
+    name: formData.deviceModel,
+    symbol: '', // symbol генерується на бекенді
+    description: `Smart Product Passport for ${formData.deviceModel}`,
+    image: imageUri,
+    attributes: [
+      { trait_type: 'Serial Number', value: formData.serialNumber },
+      { trait_type: 'Production Date', value: formData.productionDate },
+      { trait_type: 'Warranty Period', value: formData.warrantyPeriod },
+      { trait_type: 'Country of Origin', value: formData.countryOfOrigin },
+      { trait_type: 'Manufacturer ID', value: formData.manufacturerId },
+    ],
+  };
+
+  // 3. Завантажуємо метадані у Irys
+  const metadataUri = await uploadMetadataToIrys(wallet, metadata);
+
+  // 4. Відправляємо запит на бекенд для створення NFT
+  const res = await fetch(`${BACKEND_URL}/api/create-nft`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      metadata_uri: metadataUri,
+      name: formData.deviceModel,
+      wallet_address: wallet.publicKey.toString(),
+      collection_mint: collectionMint || null,
+    }),
+  });
+
+  if (!res.ok) {
+    const errorData = await res.json();
+    throw new Error(errorData.error || 'Failed to create NFT');
+  }
+
+  const data = await res.json();
+  return data;
 }
 
 // Функція для отримання NFT по власнику
@@ -450,4 +343,10 @@ export async function createNFTTransactionWithFee(metadataUri, name, symbol, fee
     console.error('Error creating NFT transaction with fee:', error);
     throw error;
   }
+} 
+
+export async function mintPassportWithMetaplex(wallet, file, formData, collectionImage) {
+    // TODO: Реалізуйте логіку minтінгу через Metaplex/Irys
+    // Поверніть signature, mintAddress або інші потрібні дані
+    return { signature: null, mintAddress: null };
 } 

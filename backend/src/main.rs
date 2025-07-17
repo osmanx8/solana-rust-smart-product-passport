@@ -12,8 +12,6 @@ use std::thread;
 use solana_client::SolanaClient;
 use solana_sdk::signature::Signer;
 use actix_web::web::Json;
-use base64::Engine;
-
 mod nft_service;
 mod collection_service;
 mod solana_client;
@@ -21,6 +19,7 @@ mod upload_service;
 use nft_service::NftService;
 use collection_service::CollectionService;
 use upload_service::UploadService;
+use mpl_token_metadata::instructions::SetAndVerifySizedCollectionItemBuilder;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct CreateNftRequest {
@@ -420,15 +419,10 @@ async fn create_nft(
 ) -> Result<HttpResponse, Error> {
     let nft_tx = _state.nft_service
         .create_nft(
-            // Передайте сюди лише ті параметри, які тепер приймає функція create_nft
-            // Наприклад:
-            // metadata_uri, name, wallet_address, collection_mint
-            // (оновіть відповідно до вашого нового API)
-            // Нижче приклад для старого API, замініть на актуальний:
-            // &_payload.metadata_uri,
-            // &_payload.name,
-            // &_payload.wallet_address,
-            // _payload.collection_mint.as_deref(),
+            &_payload.serial_number, // тимчасово як metadata_uri (замініть на справжній URI, якщо є)
+            &_payload.device_model,  // name
+            &_payload.wallet_address,
+            _payload.collection_name.as_deref(),
         )
         .await
         .map_err(|e| {

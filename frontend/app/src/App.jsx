@@ -17,7 +17,7 @@ import skydiving from './assets/comics/skydiving.png';
 import updateDrivers from './assets/comics/drivers_updating_comic.png';
 import whiteLogo from './assets/SPP_logo_white.png';
 import { requestAirdrop } from './utils/airdrop';
-import { mintPassportWithMetaplex } from './utils/nftCreator';
+import { mintPassportWithIrys } from './utils/nftCreator';
 import { getOrCreateCollection } from './utils/collectionCreator';
 import FAQ from './components/FAQ';
 import Community from './components/Community';
@@ -908,9 +908,14 @@ const App = () => {
       if (!walletAddress || !window.solana) {
         throw new Error('Please connect your wallet first');
       }
-      const { signature, mintAddress } = await mintPassportWithMetaplex(window.solana, file, formData, collectionImage);
+      const result = await mintPassportWithIrys(window.solana, file, formData, collectionImage);
+      // result may be { mintAddress, ... }
+      if (!result || !result.mintAddress) {
+        setStatus('Error: NFT was not created.');
+        return;
+      }
       setStatus('NFT Passport created successfully!');
-      setCreatedNftAddress(mintAddress);
+      setCreatedNftAddress(result.mintAddress);
       setFormData({
         serialNumber: '',
         productionDate: '',
@@ -924,7 +929,7 @@ const App = () => {
       setFile(null);
       setCollectionImage(null);
       await fetchPassports();
-      return mintAddress;
+      return result.mintAddress;
     } catch (error) {
       setStatus(`Error creating NFT passport: ${error.message}`);
       throw error;
@@ -939,9 +944,20 @@ const App = () => {
     if (!walletAddress) return;
     try {
       setIsLoading(true);
+      // Validate wallet address before using it
+      if (typeof walletAddress !== 'string' || walletAddress.length < 32) {
+        console.error('Invalid wallet address:', walletAddress);
+        throw new Error('Invalid wallet address');
+      }
+      let owner;
+      try {
+        owner = new PublicKey(walletAddress);
+      } catch (e) {
+        console.error('Failed to create PublicKey from walletAddress:', walletAddress, e);
+        throw new Error('Invalid wallet address format');
+      }
       const connection = new Connection(clusterApiUrl('devnet'), 'confirmed');
       const metaplex = new Metaplex(connection);
-      const owner = new PublicKey(walletAddress);
       const nfts = await metaplex.nfts().findAllByOwner({ owner });
 
       console.log('=== Знайдено NFT у гаманці ===');

@@ -17,7 +17,7 @@ use spl_token::id as spl_token_program_id;
 use spl_associated_token_account::get_associated_token_address;
 use spl_associated_token_account::instruction as ata_instruction;
 use mpl_token_metadata::instructions as mpl_instruction;
-use mpl_token_metadata::instructions::set_and_verify_sized_collection_item;
+use mpl_token_metadata::instructions::SetAndVerifySizedCollectionItemBuilder;
 use mpl_token_metadata::accounts::{MasterEdition, Metadata};
 use mpl_token_metadata::instructions::CreateV1Builder;
 use mpl_token_metadata::types::PrintSupply;
@@ -656,15 +656,13 @@ impl SolanaClient {
         let collection_metadata = Metadata::find_pda(collection_mint).0;
         let collection_master_edition = MasterEdition::find_pda(collection_mint).0;
 
-        set_and_verify_sized_collection_item(
-            mpl_token_metadata::ID,
-            nft_metadata,
-            *authority,
-            *authority,
-            *collection_mint,
-            collection_metadata,
-            collection_master_edition,
-            None, // collection authority record (optional)
-        )
+        SetAndVerifySizedCollectionItemBuilder::new()
+            .metadata(nft_metadata)
+            .collection(collection_metadata)
+            .collection_master_edition_account(collection_master_edition)
+            .collection_mint(*collection_mint)
+            .collection_authority(*authority)
+            .update_authority(*authority)
+            .instruction()
     }
 } 

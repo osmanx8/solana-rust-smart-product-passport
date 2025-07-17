@@ -108,3 +108,11 @@ jspm_packages/
 
 # Local Netlify folder
 .netlify
+
+# Rust (only in backend)
+/backend/target/
+/backend/Cargo.lock
+/backend/**/*.rs.bk
+
+# Anchor build artifacts
+/anchor/target/
