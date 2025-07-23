@@ -124,7 +124,7 @@ This project is developed as part of the hackathon organized by **Kumeka Team** 
 ---
 
 <div align="center">
-  <p>Built with ❤️ for the Solana community with the support of the Kumeka Team & Colloseum Hackathon</p>
+  <p>Built with ❤️ for the Solana community with the support of the web3_maxi & Colloseum Hackathon</p>
 </div>
 
 <!-- Trigger redeploy -->
