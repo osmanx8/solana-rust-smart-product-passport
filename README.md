@@ -9,7 +9,6 @@
   
   <a href="https://arena.colosseum.org/projects/explore/smart-product-passport?previous=L3Byb2plY3RzL2V4cGxvcmU_c2VlZD1kMjk5MWNlNDQ0MmM5MmVkJmhhY2thdGhvbklkPTQmc2VhcmNoPXNt" target="_blank" rel="noopener noreferrer" style="text-decoration: none;">
     <p style="background: linear-gradient(to right, #60A5FA, #A78BFA); -webkit-background-clip: text; background-clip: text; color: transparent; margin: 10px 0; font-size: 1.1em; display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer;">
-      <span>Until June 23, 2025, you can support our product at the hackathon</span>
       <span style="font-size: 1.2em;">👍</span>
     </p>
   </a>
