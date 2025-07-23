@@ -14,14 +14,6 @@
   </a>
 
   <h3 style="color: white; margin: 20px 0 10px 0; font-size: 1.2em;">Supported by</h3>
-  <div style="display: flex; justify-content: center; align-items: center; gap: 40px; margin-bottom: 20px;">
-    <a href="https://kumekateam.com/" target="_blank" rel="noopener noreferrer" style="text-decoration: none;">
-      <img src="frontend/app/src/assets/partners_logo/kumeka_black.jpg" alt="Kumeka Team Logo" height="40" style="padding: 8px;" />
-    </a>
-    <a href="https://www.colosseum.org/" target="_blank" rel="noopener noreferrer" style="text-decoration: none;">
-      <img src="frontend/app/src/assets/partners_logo/colloseum_black.jpg" alt="Colloseum Logo" height="40" style="padding: 8px;" />
-    </a>
-  </div>
 
   <p>
     <strong>Hackathon Project</strong> 🚀
